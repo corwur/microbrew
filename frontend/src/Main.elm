@@ -48,7 +48,7 @@ initialModel = {
                    , start = 0
                    , end = 0
                    }
-        ,query = Pathway.CypherQuery ""
+        ,query = Pathway.CypherQuery "MATCH (n) RETURN n LIMIT 25"
         ,pathway = Pathway.QueryResponse (Pathway.CypherResult "")
         ,start = 0
         , end = 100
@@ -82,6 +82,10 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none
 
+queryAsString : Pathway.Request -> String
+queryAsString request = case request of
+    Pathway.CypherQuery query -> query
+
 view : Model -> Browser.Document Msg
 view model = {
     title = "Micro Brewery"
@@ -102,8 +106,8 @@ view model = {
                  ]
                 ]
             , div [] [
-                 div [] [ textarea [ cols 40, rows 10, placeholder "MATCH n LIMIT 25", onInput ChangePathwayQuery ] [] ]
-                ,div [] [ button [ onClick (PathwayRequest (model.query)) ] [ text "Pathway Cypher Query" ] ]
+                 div [] [ textarea [ cols 40, rows 10, value ( queryAsString model.query ) , onInput ChangePathwayQuery ] [] ]
+                ,div [] [ button [ onClick (PathwayRequest model.query) ] [ text "Pathway Cypher Query" ] ]
                 , div [] [ case model.pathway of
                         Pathway.QueryResponse (Pathway.CypherResult result) -> text result
                         _ -> text "somthing else"

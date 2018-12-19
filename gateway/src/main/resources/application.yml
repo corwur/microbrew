@@ -4,7 +4,7 @@ zuul:
   routes:
     pathway:
       path: /api/pathway/**
-      url: http://localhost:8091/
+      url: http://localhost:8081/
       stripPrefix: true
     reference:
       path: /api/genome/**
