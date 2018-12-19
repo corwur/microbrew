@@ -1,0 +1,15 @@
+server:
+  port: 8090
+zuul:
+  routes:
+    pathway:
+      path: /api/pathway/**
+      url: http://localhost:8091/
+      stripPrefix: true
+    reference:
+      path: /api/genome/**
+      url: http://localhost:8080/
+      stripPrefix: true
+    datasets:
+      path: /api/datasets/**
+      url: http://www.biodalliance.org/
