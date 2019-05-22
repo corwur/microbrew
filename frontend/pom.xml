@@ -33,17 +33,16 @@
                 <version>1.6.0</version>
                 <executions>
                     <execution>
-                        <id>elm-make</id>
+                        <id>brunch-build</id>
                         <phase>compile</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <executable>elm</executable>
+                            <executable>npx</executable>
                             <arguments>
-                                <argument>make</argument>
-                                <argument>src/Main.elm</argument>
-                                <argument>--output=target/js/main.js</argument>
+                                <argument>brunch</argument>
+                                <argument>build</argument>
                             </arguments>
                         </configuration>
                     </execution>
@@ -51,6 +50,5 @@
             </plugin>
         </plugins>
     </build>
-
 
 </project>

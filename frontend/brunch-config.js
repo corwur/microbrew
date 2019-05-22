@@ -19,9 +19,6 @@ module.exports = {
         watched: ["app", "src" ]
     },
     plugins: {
-        elmBrunch: {
-            mainModules: ["src/Main.elm"]
-        },
         babel: {presets: ['latest']}
     },
     npm: {
