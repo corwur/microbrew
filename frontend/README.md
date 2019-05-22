@@ -12,5 +12,4 @@ Goto to localhost:4200
 
 TODO:
 - implement the pileup browser 
-- remove the Em stuff
 
