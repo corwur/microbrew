@@ -55,8 +55,8 @@ handle f result =
         Ok value -> f (Ok value)
         Err err -> f(Err Error)
 
-handle2: (a->b) -> ((Result Error b) -> Response) ->  (Result Http.Error a) -> Response
-handle2 m f result =
+handleWithMap: (a->b) -> ((Result Error b) -> Response) ->  (Result Http.Error a) -> Response
+handleWithMap m f result =
     case result of
         Ok value -> f (Ok (m value))
         Err err -> f(Err Error)
@@ -70,8 +70,8 @@ handleRequest request =
             , expect = Http.expectJson (handle SequenceDictionaryResponse) decodeSequences
             }
         Reference data -> Http.get
-            { url =Url.Builder.absolute ["api", "genome", "reference", data.contig ] [ Url.Builder.int"start" data.start, Url.Builder.int "end" data.end ]
-            , expect = Http.expectString (handle2 decodeDna ReferenceResponse)
+            { url =Url.Builder.absolute ["api", "genome", "reference", data.contig ] [ Url.Builder.int "start" data.start, Url.Builder.int "end" data.end ]
+            , expect = Http.expectString (handleWithMap decodeDna ReferenceResponse)
             }
         Reads data -> Http.get
            { url =Url.Builder.absolute ["api", "genome", "reads", data.table, data.contig ] [ Url.Builder.int"start" data.start, Url.Builder.int "end" data.end ]

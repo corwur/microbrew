@@ -12,6 +12,20 @@
     <artifactId>frontend</artifactId>
 
     <build>
+        <resources>
+            <resource>
+                <directory>${project.build.directory}/js</directory>
+                <includes>
+                    <include>*.js</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/js</directory>
+                <includes>
+                    <include>index.html</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -29,6 +43,7 @@
                             <arguments>
                                 <argument>make</argument>
                                 <argument>src/Main.elm</argument>
+                                <argument>--output=target/js/main.js</argument>
                             </arguments>
                         </configuration>
                     </execution>
