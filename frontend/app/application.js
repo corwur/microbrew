@@ -1,11 +1,14 @@
 'use strict';
 const rx = require('rxjs')
+const rx_operators = require('rxjs/operators')
+
 var bootstrap = require('bootstrap')
 var jquery = require('jquery')
 var pileup = require('pileup')
 var cytoscape = require('cytoscape')
 var geneStructure = require('gene-structure');
 var reactome = require('reactome')
+var circos = require('circos')
 
 const geneIdentifierSubject = new rx.Subject()
 
@@ -41,6 +44,21 @@ const App = {
 
     getGeneStructure: function(geneIdentifier, distance) {
 
+        var observable = App.geneStructure.getStructure(geneIdentifier, distance).pipe(rx_operators.share());
+
+        observable.subscribe(App.renderStructureGraph)
+        observable.subscribe(App.renderCircleDiagram)
+
+    },
+
+    getPathwayInformation: function(geneIdentifier) {
+        var elem = document.getElementById("reactome")
+        reactome.findGene(geneIdentifier).subscribe(
+            data => elem.innerHTML = JSON.stringify(data),
+            error => elem.innerHTML = "No pathway data in reactome")
+    },
+
+    renderStructureGraph: function(data) {
         const convertToCyData = function(data) {
             var cyData = []
             for(var index =0; index < data.genes.length ; index++) {
@@ -55,26 +73,62 @@ const App = {
 
             return cyData;
         }
-        var observable = App.geneStructure.getStructure(geneIdentifier, distance);
-        observable.subscribe(data => {
-            var cyData = convertToCyData(data);
-            App.cy.remove('*');
-            App.cy.add(cyData);
-            App.cy.style().selector('edge').style(
-                {
-                    "curve-style": "bezier",
-                    label:"data(id)"
-                }
-            ).update()
-            App.cy.layout({ name:'grid'}).run()
-        })
+
+        var cyData = convertToCyData(data);
+        App.cy.remove('*');
+        App.cy.add(cyData);
+        App.cy.style().selector('edge').style(
+            {
+                "curve-style": "bezier",
+                label:"data(id)"
+            }
+        ).update()
+        App.cy.layout({ name:'grid'}).run()
+
     },
 
-    getPathwayInformation: function(geneIdentifier) {
-        var elem = document.getElementById("reactome")
-        reactome.findGene(geneIdentifier).subscribe(
-            data => elem.innerHTML = JSON.stringify(data),
-            error => elem.innerHTML = "No pathway data in reactome")
+    renderCircleDiagram: function(structureData) {
+
+        var configuration = {
+            innerRadius: 250,
+            outerRadius: 300,
+            cornerRadius: 10,
+            gap: 0.04, // in radian
+            labels: {
+                display: true,
+                position: 'center',
+                size: '14px',
+                color: '#000000',
+                radialOffset: 20,
+            },
+            ticks: {
+                display: true,
+                color: 'grey',
+                spacing: 10000000,
+                labels: true,
+                labelSpacing: 10,
+                //labelSuffix: 'Mb',
+                //labelDenominator: 1000000,
+                labelDisplay0: true,
+                labelSize: '40px',
+                labelColor: '#000000',
+                labelFont: 'default',
+                majorSpacing: 5,
+                size: {
+                    minor: 2,
+                    major: 5,
+                }
+            },
+            events: {}
+        }
+
+        //organisms
+        var data = []
+        for(var index = 0; index < structureData.organisms.length; index ++) {
+            data.push( { len: 1, color: "#8dd3c7", label: structureData.organisms[index].name} )
+        }
+        App.circos.layout(data, configuration);
+        App.circos.render();
     },
 
 
@@ -142,6 +196,46 @@ const App = {
                 }
             ]
         });
+
+        App.circos =  new circos({
+            container: '#circos',
+            width: 800,
+            height: 600,
+        });
+
+        var configuration = {
+            innerRadius: 250,
+            outerRadius: 300,
+            cornerRadius: 10,
+            gap: 0.04, // in radian
+            labels: {
+                display: true,
+                position: 'center',
+                size: '14px',
+                color: '#000000',
+                radialOffset: 20,
+            },
+            ticks: {
+                display: true,
+                color: 'grey',
+                spacing: 10000000,
+                labels: true,
+                labelSpacing: 10,
+                labelSuffix: 'Mb',
+                labelDenominator: 1000000,
+                labelDisplay0: true,
+                labelSize: '10px',
+                labelColor: '#000000',
+                labelFont: 'default',
+                majorSpacing: 5,
+                size: {
+                    minor: 2,
+                    major: 5,
+                }
+            },
+            events: {}
+        }
+
     }
 };
 

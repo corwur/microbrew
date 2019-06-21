@@ -1,0 +1,23 @@
+server:
+  port: 8090
+zuul:
+  routes:
+    pathway:
+      path: /api/pathway/**
+      url: http://pathway:8081/
+      stripPrefix: true
+    structure:
+      path: /api/structure/**
+      url: http://structure:8088/
+      stripPrefix: true
+    reference:
+      path: /api/genome/**
+      url: http://reference:8080/
+      stripPrefix: true
+    reactome:
+      path: /api/reactome/**
+      url: https://reactome.org/
+      stripPrefix: true
+    datasets:
+      path: /api/datasets/**
+      url: http://www.biodalliance.org/

@@ -18,6 +18,8 @@
     <properties>
         <maven.compiler.source>1.11</maven.compiler.source>
         <maven.compiler.target>1.11</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
     <build>
         <plugins>
@@ -32,5 +34,71 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>docker</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>copy-jar-to-docker</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${build.directory}/docker</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>${build.directory}</directory>
+                                            <includes>
+                                                <include>*-with-dependencies.jar</include>
+                                            </includes>
+                                        </resource>
+                                        <resource>
+                                            <directory>${basedir}/src/docker</directory>
+                                            <includes>
+                                                <include>*</include>
+                                            </includes>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.6.0</version>
+                        <executions>
+                            <execution>
+                                <id>docker-build</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>docker</executable>
+                                    <workingDirectory>${build.directory}/docker</workingDirectory>
+                                    <arguments>
+                                        <argument>build</argument>
+                                        <argument>--build-arg</argument>
+                                        <argument>jar=${project.artifactId}-${project.version}-jar-with-dependencies.jar</argument>
+                                        <argument>.</argument>
+                                        <argument>-t</argument>
+                                        <argument>microbrew/${project.artifactId}:${project.version}</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>
