@@ -61,18 +61,19 @@ const App = {
 
         var observable = App.geneStructure.getStructure(geneIdentifier, distance).pipe(rx_operators.share());
 
-        observable.subscribe(App.renderStructureGraph)
+        observable.subscribe(App.renderStructureGraph);
         observable.subscribe(App.renderCircleDiagram)
 
     },
 
     getPathwayInformation: function(geneIdentifier) {
-        var elem = document.getElementById("reactome")
+        var elem = document.getElementById("reactome");
         reactome.findGene(geneIdentifier).subscribe(
             data => elem.innerHTML = JSON.stringify(data),
-            error => elem.innerHTML = "No pathway data in reactome")
+            error => elem.innerHTML = "No pathway data in reactome");
     },
 
+    
     renderStructureGraph: function(data) {
         const convertToCyData = function(data) {
             var cyData = []
@@ -138,21 +139,26 @@ const App = {
         }
         
         //organisms
-        var data = []
+        var data = [];
+        var contigs = new Set();
+        
         for(var index = 0; index < structureData.sequences.length; index ++) {
         	var name = structureData.sequences[index].name + "(" + structureData.sequences[index].organism + ")"
             data.push( { len: structureData.sequences[index].length, 
             			color: "#8dd3c7", 
             			label: name, 
-            			id: ""+structureData.sequences[index].id} )
+            			id: ""+structureData.sequences[index].id} );
+        	contigs.add(structureData.sequences[index].id);
         }
+        console.log(contigs);	
         App.circos.layout(data, configuration);
         var colors = new Colors(); 
         for (var index =0; index < structureData.genes.length; index++){
             data = [];
         	for (var source=0; source < structureData.genes[index].on.length; source++){
             	for (var target=source+1; target < structureData.genes[index].on.length; target++){
-            		
+            		if (contigs.has(structureData.genes[index].on[source].id) && 
+            				contigs.has(structureData.genes[index].on[target].id) ) {
             		data.push({
             					source:{
             						id:""+structureData.genes[index].on[source].id, 
@@ -163,6 +169,7 @@ const App = {
             						start:structureData.genes[index].on[target].start,
             						end:structureData.genes[index].on[target].end},
             					})
+            		}
             						
             	}
         	}
@@ -176,6 +183,7 @@ const App = {
         geneIdentifierSubject.subscribe((req) => App.getGeneStructure(req.geneId,req.distance))
         geneIdentifierSubject.subscribe((req) => console.log("gene identifier is: "  + JSON.stringify(req)))
         geneIdentifierSubject.subscribe((req) => App.getPathwayInformation(req.geneId))
+
 
         App.geneStructure = geneStructure;
         App.cy = cytoscape({
@@ -238,7 +246,7 @@ const App = {
         });
 
         App.circos =  new circos({
-            container: '#circos',
+            container: document.getElementById('#circos'),
             width: 800,
             height: 600,
         });
