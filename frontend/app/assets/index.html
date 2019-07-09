@@ -1,0 +1,65 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+   <meta charset="UTF-8">
+   <title>Microbrewery</title>
+   <link rel="stylesheet" type="text/css" href="css/main.min.css">
+   <link rel="stylesheet" type="text/css" href="css/vendor.css">
+   <script src="js/vendor.js"></script>
+   <script src="app.js"></script>
+</head>
+<div class="container">
+   <nav class="avbar navbar-expand-lg navbar-light bg-light">
+       <a class="navbar-brand" href="#">Microbrewery</a>
+       <div class="collapse navbar-collapse">
+           <ul class="nav nav-pills">
+               <li class="nav-item active">
+                   <a class="nav-link active" data-toggle="tab" href="#structure">Structure</a>
+               </li>
+               <li class="nav-item active">
+                   <a class="nav-link" data-toggle="tab" href="#pathway">Pathway</a>
+               </li>
+               <li class="nav-item">
+                   <a class="nav-link" data-toggle="tab" href="#genome">Genome</a>
+               </li>
+               <li class="nav-item active">
+                   <a class="nav-link" data-toggle="tab" href="#circosplot">Circos</a>
+               </li>
+           </ul>
+           <form class="form-inline my-2 my-lg-0" autocomplete="off" onsubmit="App.selectGene(this, event)">
+               <div>
+                   <input class="form-control" id="selectGeneId" name="Gene identifier" placeholder="Gene identifier"
+                          onkeyup="App.findGene(this)">
+                   <div id="gene-id-autocomplete"></div>
+               </div>
+               <input class="form-control"  style="max-width: 80pt" id="distance" name="Distance" type="number" placeholder="Distance">
+               <input type="submit" value="Show">
+           </form>
+       </div>
+   </nav>
+   <div class="tab-content">
+       <div id="structure" class="tab-pane fade show active">
+           <div id="cy"></div>
+       </div>
+       <div id="pathway" class="tab-pane fade">
+           <div id="reactome"></div>
+       </div>
+       <div id="genome" class="tab-pane fade">
+           <div id="pileup">
+           </div>
+       </div>
+       
+       <div id="circosplot" class="tab-pane fade">
+           <div id="circos"></div>
+       </div>   
+   </div>
+</div>
+<script>
+   var App = require('application.js')
+   App.init({
+       node: document.getElementById('pileup')
+   });
+
+</script>
+</body>
+</html>
