@@ -9,8 +9,23 @@ var cytoscape = require('cytoscape')
 var geneStructure = require('gene-structure');
 var reactome = require('reactome')
 var circos = require('circos')
-
 const geneIdentifierSubject = new rx.Subject()
+
+var Colors = class  {
+	constructor() {
+		this.colors = ["#A4262C", "#CA5010","#8F7034","#407855","#038387","#0078D4","#40587C","#4052AB","#854085","#8764B8","#737373","#867365"];
+		this.currentColor = 0;
+	}
+	pick(){
+		var col = this.colors[this.currentColor];
+		this.currentColor++;
+		if (this.currentColor >= this.colors.length) {
+			this.currentColor = 0;
+		}
+		console.log(col)
+		return col;
+	}
+}
 
 const App = {
 
@@ -33,7 +48,7 @@ const App = {
         if(geneId && geneId.length >=1) {
             geneStructure.findGene(geneId + ".*").subscribe(data => {
                 var list = document.getElementById("gene-id-autocomplete")
-                console.log(JSON.stringify(data))
+                //console.log(JSON.stringify(data))
                 var html = '<ul class="select-gene">' +
                     data.genes.map(geneId => '<li><a href="#" onclick="App.clickGene(\'' + geneId + '\', event)">' + geneId + '</a></li>').reduce((a,b) => a + b) + '</ul>'
                 list.innerHTML = html
@@ -93,7 +108,7 @@ const App = {
             innerRadius: 250,
             outerRadius: 300,
             cornerRadius: 10,
-            gap: 0.04, // in radian
+            gap: 0.01, // in radian
             labels: {
                 display: true,
                 position: 'center',
@@ -102,7 +117,7 @@ const App = {
                 radialOffset: 20,
             },
             ticks: {
-                display: true,
+                display: false,
                 color: 'grey',
                 spacing: 10000000,
                 labels: true,
@@ -121,13 +136,38 @@ const App = {
             },
             events: {}
         }
-
+        
         //organisms
         var data = []
-        for(var index = 0; index < structureData.organisms.length; index ++) {
-            data.push( { len: 1, color: "#8dd3c7", label: structureData.organisms[index].name} )
+        for(var index = 0; index < structureData.sequences.length; index ++) {
+        	var name = structureData.sequences[index].name + "(" + structureData.sequences[index].organism + ")"
+            data.push( { len: structureData.sequences[index].length, 
+            			color: "#8dd3c7", 
+            			label: name, 
+            			id: ""+structureData.sequences[index].id} )
         }
         App.circos.layout(data, configuration);
+        var colors = new Colors(); 
+        for (var index =0; index < structureData.genes.length; index++){
+            data = [];
+        	for (var source=0; source < structureData.genes[index].on.length; source++){
+            	for (var target=source+1; target < structureData.genes[index].on.length; target++){
+            		
+            		data.push({
+            					source:{
+            						id:""+structureData.genes[index].on[source].id, 
+            						start:structureData.genes[index].on[source].start,
+            						end:structureData.genes[index].on[source].end},
+            					target:{
+            						id:""+structureData.genes[index].on[target].id, 
+            						start:structureData.genes[index].on[target].start,
+            						end:structureData.genes[index].on[target].end},
+            					})
+            						
+            	}
+        	}
+            App.circos.chords("links_"+structureData.genes[index].geneIdentifier, data, {color:colors.pick()});
+        }
         App.circos.render();
     },
 

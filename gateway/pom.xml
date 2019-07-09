@@ -27,6 +27,11 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+            	<groupId>corwur.microbrew</groupId>
+            	<artifactId>frontend</artifactId>
+            	<version>1.0-SNAPSHOT</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -44,7 +49,7 @@
             <artifactId>spring-cloud-starter-netflix-hystrix</artifactId>
         </dependency>
         <dependency>
-        	<groupId>microbrewery</groupId>
+        	<groupId>corwur.microbrew</groupId>
         	<artifactId>frontend</artifactId>
         </dependency>
     </dependencies>

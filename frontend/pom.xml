@@ -45,4 +45,6 @@
         </plugins>
     </build>
 
+    <groupId>corwur.microbrew</groupId>
+    <version>1.0-SNAPSHOT</version>
 </project>

@@ -22,7 +22,7 @@ public class GeneStructureRepository {
     private static final String GET_GENE_ON = "MATCH (g:gene)-[r:on]-(s:sequence) WHERE g.name=$geneId RETURN g,r,s";
     private static final String GET_ALL_GENES_WITHIN_DISTANCE = "MATCH (n:gene)-[r:backbone*..%d]-(g:gene) WHERE n.name=$geneId RETURN DISTINCT g";
     private static final String GET_ORGANISMS = "MATCH (g:gene)-[r:order]->(t:gene) WHERE g.name IN $genes WITH r.in AS r_in MATCH (o:organism) WHERE o.name=r_in RETURN DISTINCT o";
-    private static final String GET_ALL_SEQUENCES = "MATCH (g:gene)-[r:on]->(s:sequence) WHERE g.name IN $genes RETURN g, r, s";
+    private static final String GET_ALL_SEQUENCES = "MATCH (g:gene)-[r:on]->(s:sequence) WHERE g.name IN $genes RETURN g, r, s ORDER BY s.organisme, s.name";
     private static final String GET_ORDER_LINKS = "MATCH (g:gene)-[r:order]->(t:gene) WHERE g.name IN $genes and t.name in $genes RETURN g,r,t";
     private static final String GET_BACKBONE_LINKS = "MATCH (g:gene)-[r:backbone]->(t:gene) WHERE g.name IN $genes and t.name in $genes RETURN g,r,t";
 
@@ -151,6 +151,7 @@ public class GeneStructureRepository {
         return new On(
                 get(result, "g", "name").map(Value::asString).orElse(""),
                 get(result, "s", "name").map(Value::asString).orElse(""),
+                get(result, "s", "id").map(Value::asLong).orElse(0l),
                 getRelationship(result, "r", "start", Value::asLong).orElse(0l),
                 getRelationship(result, "r", "end", Value::asLong).orElse(0l)
         );
@@ -173,7 +174,9 @@ public class GeneStructureRepository {
     private Sequence createSequence(Map<String, Object> result) {
         return new Sequence(
                 get(result, "s", "name").map(Value::asString).orElse(""),
-                get(result, "s", "organism").map(Value::asString).orElse("")
+                get(result, "s", "organism").map(Value::asString).orElse(""),
+                get(result, "s", "length").map(Value::asLong).orElse(0l),
+                get(result, "s", "id").map(Value::asLong).orElse(0l)
         );
     }
 
