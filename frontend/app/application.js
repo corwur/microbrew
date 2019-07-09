@@ -13,7 +13,7 @@ const geneIdentifierSubject = new rx.Subject()
 
 var Colors = class  {
 	constructor() {
-		this.colors = ["#A4262C", "#CA5010","#8F7034","#407855","#038387","#0078D4","#40587C","#4052AB","#854085","#8764B8","#737373","#867365"];
+		this.colors = ["#A4262C", "#8F7034","#407855","#038387","#CA5010","#0078D4","#40587C","#4052AB","#854085","#8764B8","#737373","#867365"];
 		this.currentColor = 0;
 	}
 	pick(){
@@ -22,7 +22,6 @@ var Colors = class  {
 		if (this.currentColor >= this.colors.length) {
 			this.currentColor = 0;
 		}
-		console.log(col)
 		return col;
 	}
 }
@@ -66,10 +65,30 @@ const App = {
 
     },
 
+    showPathway: function(pathway) {
+    	for (var index=0; index < 1; index++) { //pathway.length
+			var name = pathway[index].stId;
+	        App.diagram.loadDiagram(name);
+	        App.diagram.onDiagramLoaded(function (loaded) {
+	            console.info("Loaded ", loaded);
+	            //diagram.flagItems("FYN");
+	            if (loaded == name) App.diagram.selectItem(name);
+	        });
+    	}    	
+    },
+    
+    showPathways: function(gene) {
+    	for (var index=0; index < gene.results[0].entries.length; index++){
+    		reactome.getPathway(gene.results[0].entries[index].stId).subscribe(
+    	            data => App.showPathway(data));
+    	}
+    },
+    
     getPathwayInformation: function(geneIdentifier) {
         var elem = document.getElementById("reactome");
+        
         reactome.findGene(geneIdentifier).subscribe(
-            data => elem.innerHTML = JSON.stringify(data),
+            data => App.showPathways(data),
             error => elem.innerHTML = "No pathway data in reactome");
     },
 
@@ -99,12 +118,18 @@ const App = {
                 label:"data(id)"
             }
         ).update()
-        App.cy.layout({ name:'grid'}).run()
+        App.cy.layout({ name: 'cose'}).run()
 
     },
 
     renderCircleDiagram: function(structureData) {
-
+    	document.getElementById('circos').innerHTML = "";
+    	App.circos =  new circos({
+            container: document.getElementById('circos'),
+            width: 800,
+            height: 600,
+        });
+    	
         var configuration = {
             innerRadius: 250,
             outerRadius: 300,
@@ -144,21 +169,23 @@ const App = {
         
         for(var index = 0; index < structureData.sequences.length; index ++) {
         	var name = structureData.sequences[index].name + "(" + structureData.sequences[index].organism + ")"
-            data.push( { len: structureData.sequences[index].length, 
-            			color: "#8dd3c7", 
-            			label: name, 
-            			id: ""+structureData.sequences[index].id} );
-        	contigs.add(structureData.sequences[index].id);
+        	//console.log(structureData.sequences[index].length);
+        	if (structureData.sequences[index].length > 100000) {
+	            data.push( { len: structureData.sequences[index].length, 
+	            			color: "#8dd3c7", 
+	            			label: name, 
+	            			id: ""+structureData.sequences[index].id} );
+	        	contigs.add(structureData.sequences[index].id);
+	        }
         }
-        console.log(contigs);	
+        //console.log(contigs);	
         App.circos.layout(data, configuration);
         var colors = new Colors(); 
         for (var index =0; index < structureData.genes.length; index++){
             data = [];
         	for (var source=0; source < structureData.genes[index].on.length; source++){
             	for (var target=source+1; target < structureData.genes[index].on.length; target++){
-            		if (contigs.has(structureData.genes[index].on[source].id) && 
-            				contigs.has(structureData.genes[index].on[target].id) ) {
+            		if (contigs.has(structureData.genes[index].on[source].id) && contigs.has(structureData.genes[index].on[target].id) ) 
             		data.push({
             					source:{
             						id:""+structureData.genes[index].on[source].id, 
@@ -169,20 +196,32 @@ const App = {
             						start:structureData.genes[index].on[target].start,
             						end:structureData.genes[index].on[target].end},
             					})
-            		}
+            		
             						
             	}
         	}
-            App.circos.chords("links_"+structureData.genes[index].geneIdentifier, data, {color:colors.pick()});
+            App.circos.chords("links_"+structureData.genes[index].geneIdentifier.replace(/[\|\.]/g,"_"), data, {color:colors.pick(),
+                tooltipContent: function (datum, index) {
+                    return "";
+                  }});
         }
         App.circos.render();
     },
 
+    createDiagram: function(){
+    	App.diagram = Reactome.Diagram.create({
+            "placeHolder" : "reactome",
+            "width" : 900,
+            "height" : 500
+    	});
+    },
 
     init(config) {
         geneIdentifierSubject.subscribe((req) => App.getGeneStructure(req.geneId,req.distance))
         geneIdentifierSubject.subscribe((req) => console.log("gene identifier is: "  + JSON.stringify(req)))
         geneIdentifierSubject.subscribe((req) => App.getPathwayInformation(req.geneId))
+
+        
 
 
         App.geneStructure = geneStructure;
@@ -195,7 +234,10 @@ const App = {
                 {
                     selector: 'node',
                     style: {
-                        'background-color': '#666',
+                    	'font-size':4,
+                    	'width':6,
+                    	'height':6,
+                        'background-color': 'green',
                         'label': 'data(id)'
                     }
                 },
@@ -203,17 +245,17 @@ const App = {
                 {
                     selector: 'edge',
                     style: {
-                        'width': 3,
-                        'line-color': '#ccc',
-                        'target-arrow-color': '#ccc',
+                        'width': 1,
+                        'font-size' : 2,
+                        'line-color': 'lightblue',
+                        'target-arrow-color': 'lightblue',
                         'target-arrow-shape': 'triangle'
                     }
                 }
             ],
 
             layout: {
-                name: 'grid',
-                rows: 1
+            	name: 'cose'
             }
         });
 
@@ -245,44 +287,6 @@ const App = {
             ]
         });
 
-        App.circos =  new circos({
-            container: document.getElementById('#circos'),
-            width: 800,
-            height: 600,
-        });
-
-        var configuration = {
-            innerRadius: 250,
-            outerRadius: 300,
-            cornerRadius: 10,
-            gap: 0.04, // in radian
-            labels: {
-                display: true,
-                position: 'center',
-                size: '14px',
-                color: '#000000',
-                radialOffset: 20,
-            },
-            ticks: {
-                display: true,
-                color: 'grey',
-                spacing: 10000000,
-                labels: true,
-                labelSpacing: 10,
-                labelSuffix: 'Mb',
-                labelDenominator: 1000000,
-                labelDisplay0: true,
-                labelSize: '10px',
-                labelColor: '#000000',
-                labelFont: 'default',
-                majorSpacing: 5,
-                size: {
-                    minor: 2,
-                    major: 5,
-                }
-            },
-            events: {}
-        }
 
     }
 };
