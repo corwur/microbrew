@@ -1,5 +1,4 @@
 *.iml
 target
-index.html
 node_modules/
 public/
