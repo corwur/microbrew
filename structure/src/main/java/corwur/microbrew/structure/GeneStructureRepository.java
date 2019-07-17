@@ -167,7 +167,8 @@ public class GeneStructureRepository {
     private Backbone createBackboneLink(Map<String, Object> result) {
         return new Backbone(
                 get(result, "g", "name").map(Value::asString).orElse(""),
-                get(result, "t", "name").map(Value::asString).orElse("")
+                get(result, "t", "name").map(Value::asString).orElse(""),
+                getRelationship(result, "r", "of", Value::asLong).orElse(0l)
         );
     }
 

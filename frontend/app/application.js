@@ -57,7 +57,7 @@ const App = {
 
 
     getGeneStructure: function(geneIdentifier, distance) {
-
+    	App.geneIdentifier = geneIdentifier;
         var observable = App.geneStructure.getStructure(geneIdentifier, distance).pipe(rx_operators.share());
 
         observable.subscribe(App.renderStructureGraph);
@@ -86,7 +86,6 @@ const App = {
     
     getPathwayInformation: function(geneIdentifier) {
         var elem = document.getElementById("reactome");
-        
         reactome.findGene(geneIdentifier).subscribe(
             data => App.showPathways(data),
             error => elem.innerHTML = "No pathway data in reactome");
@@ -97,13 +96,20 @@ const App = {
         const convertToCyData = function(data) {
             var cyData = []
             for(var index =0; index < data.genes.length ; index++) {
-                cyData.push({ group:'nodes',  position: { x: 200, y: 200 }, data: { id:data.genes[index].geneIdentifier, weight:20 } } )
+            	var selected = data.genes[index].geneIdentifier == App.geneIdentifier;
+                cyData.push({ group:'nodes',  position: { x: 200, y: 200 }, data: { id:data.genes[index].geneIdentifier, weight:20, selected:selected } } )
             }
             // for(var index =0; index < data.order.length ; index++) {
             //     cyData.push({ group:'edges', data: { organism:data.order[index].organism,  id:"order" + index, source:data.order[index].from, target:data.order[index].to } } )
             // }
             for(var index =0; index < data.backbone.length ; index++) {
-                cyData.push({ group:'edges', data: { id:"backbone" + index, source:data.backbone[index].from, target:data.backbone[index].to } } )
+                cyData.push({ group:'edges', data: { 
+                	id:"backbone" + index, 
+                	source:data.backbone[index].from, 
+                	target:data.backbone[index].to,
+                	label: "backbone: " + data.backbone[index].of,
+                	of: data.backbone[index].of,
+                	weight: data.backbone[index].of}} )
             }
 
             return cyData;
@@ -112,13 +118,8 @@ const App = {
         var cyData = convertToCyData(data);
         App.cy.remove('*');
         App.cy.add(cyData);
-        App.cy.style().selector('edge').style(
-            {
-                "curve-style": "bezier",
-                label:"data(id)"
-            }
-        ).update()
-        App.cy.layout({ name: 'cose'}).run()
+        
+        App.cy.layout({ name: 'cose'}).run();
 
     },
 
@@ -217,13 +218,7 @@ const App = {
     },
 
     init(config) {
-        geneIdentifierSubject.subscribe((req) => App.getGeneStructure(req.geneId,req.distance))
-        geneIdentifierSubject.subscribe((req) => console.log("gene identifier is: "  + JSON.stringify(req)))
-        geneIdentifierSubject.subscribe((req) => App.getPathwayInformation(req.geneId))
-
-        
-
-
+    
         App.geneStructure = geneStructure;
         App.cy = cytoscape({
             container: document.getElementById('cy'),
@@ -237,11 +232,18 @@ const App = {
                     	'font-size':4,
                     	'width':6,
                     	'height':6,
-                        'background-color': 'green',
+                        'background-color': "green",
                         'label': 'data(id)'
                     }
                 },
-
+                {
+                    selector: 'node[?selected]',
+                    style: {
+                        'background-color': 'blue',
+                        'color' : 'blue'
+                    }
+                	
+                },
                 {
                     selector: 'edge',
                     style: {
@@ -249,7 +251,10 @@ const App = {
                         'font-size' : 2,
                         'line-color': 'lightblue',
                         'target-arrow-color': 'lightblue',
-                        'target-arrow-shape': 'triangle'
+                        'target-arrow-shape': 'triangle',
+                        "curve-style": "bezier",
+                        label:"data(label)",
+                        width:"mapData(weight, 0, 100, 2, 10)"
                     }
                 }
             ],
@@ -259,7 +264,11 @@ const App = {
             }
         });
 
-
+        geneIdentifierSubject.subscribe((req) => App.getGeneStructure(req.geneId,req.distance));
+        geneIdentifierSubject.subscribe((req) => console.log("gene identifier is: "  + JSON.stringify(req)));
+        geneIdentifierSubject.subscribe((req) => App.getPathwayInformation(req.geneId));
+        //App.cy.on('tap','node', function(event) { console.log(event.target.id()); App.getPathwayInformation(event.target.id());});
+        
         console.log('App initialized.');
 
 
