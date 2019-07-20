@@ -13,7 +13,7 @@ public class StructureApplication {
 
         ApplicationConfiguration applicationConfiguration = ApplicationConfiguration.load("application.properties");
         Server server = new Server(applicationConfiguration.getPort());
-        Context context = server.addContext("/gene", new GsonResponseWriter(), MediaType.APPLICATION_JSON);
+        Context context = server.addContext("/gene", (ResponseWriter) new GsonResponseWriter(), MediaType.APPLICATION_JSON);
         GeneStructureRepository geneStructureRepository = new GeneStructureRepository(applicationConfiguration);
 
         context.get(Lychee.regex("/gene/(?<geneId>\\w*)$"), ((request, response) -> {
