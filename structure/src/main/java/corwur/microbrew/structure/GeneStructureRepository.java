@@ -1,6 +1,8 @@
 package corwur.microbrew.structure;
 
-import corwur.microbrew.structure.graph.CypherClient;
+import corwur.microbrew.neo4j.ApplicationConfiguration;
+import corwur.microbrew.neo4j.ApplicationException;
+import corwur.microbrew.neo4j.CypherClient;
 import corwur.microbrew.structure.model.*;
 import org.neo4j.driver.v1.Value;
 import org.neo4j.driver.v1.types.Node;
