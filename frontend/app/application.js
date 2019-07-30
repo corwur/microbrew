@@ -87,7 +87,6 @@ const App = {
     
     renderStructureGraph: function(data) {
         const convertToCyData = function(data) {
-        	console.log(data);
             var cyData = []
             for(var index =0; index < data.genes.length ; index++) {
             	var selected = data.genes[index].name == App.geneIdentifier;
