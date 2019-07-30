@@ -4,15 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Gene {
-    public final String geneIdentifier;
+    public final String name;
     public List<On> on = new ArrayList<>();
-
-    public Gene(String geneIdentifier) {
-        this.geneIdentifier = geneIdentifier;
+    public final long id;
+    
+    public Gene(String geneIdentifier, long id) {
+        this.name = geneIdentifier;
+        this.id = id;
     }
 
     public String getGeneIdentifier() {
-        return geneIdentifier;
+        return name;
+    }
+    
+    public long getId() {
+    	return id;
     }
 
     public void addOn(On on) {

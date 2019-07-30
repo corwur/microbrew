@@ -1,30 +1,23 @@
 'use strict';
-const rx = require('rxjs')
-const rx_operators = require('rxjs/operators')
+const rx = require('rxjs');
+const rx_operators = require('rxjs/operators');
 
-var bootstrap = require('bootstrap')
-var jquery = require('jquery')
-var pileup = require('pileup')
-var cytoscape = require('cytoscape')
+var bootstrap = require('bootstrap');
+var jquery = require('jquery');
+var pileup = require('pileup');
+var cytoscape = require('cytoscape');
+var cytoscapeContextMenus = require('cytoscape-menus-app');
+var contextMenus = require('cytoscape-context-menus');
 var geneStructure = require('gene-structure');
-var reactome = require('reactome')
-var circos = require('circos')
-const geneIdentifierSubject = new rx.Subject()
+var reactome = require('reactome');
+var circos = require('circos');
+var Colors = require('Colors');
 
-var Colors = class  {
-	constructor() {
-		this.colors = ["#A4262C", "#8F7034","#407855","#038387","#CA5010","#0078D4","#40587C","#4052AB","#854085","#8764B8","#737373","#867365"];
-		this.currentColor = 0;
-	}
-	pick(){
-		var col = this.colors[this.currentColor];
-		this.currentColor++;
-		if (this.currentColor >= this.colors.length) {
-			this.currentColor = 0;
-		}
-		return col;
-	}
-}
+cytoscape.use(contextMenus, jquery ); // register extension
+
+
+const geneIdentifierSubject = new rx.Subject();
+
 
 const App = {
 
@@ -94,17 +87,23 @@ const App = {
     
     renderStructureGraph: function(data) {
         const convertToCyData = function(data) {
+        	console.log(data);
             var cyData = []
             for(var index =0; index < data.genes.length ; index++) {
-            	var selected = data.genes[index].geneIdentifier == App.geneIdentifier;
-                cyData.push({ group:'nodes',  position: { x: 200, y: 200 }, data: { id:data.genes[index].geneIdentifier, weight:20, selected:selected } } )
+            	var selected = data.genes[index].name == App.geneIdentifier;
+                cyData.push({ group:'nodes',  position: { x: 200, y: 200 }, data: {
+                	label:data.genes[index].name,
+                	id:data.genes[index].id, 
+                	weight:20, 
+                	selected:selected 
+                	} } )
             }
             // for(var index =0; index < data.order.length ; index++) {
             //     cyData.push({ group:'edges', data: { organism:data.order[index].organism,  id:"order" + index, source:data.order[index].from, target:data.order[index].to } } )
             // }
             for(var index =0; index < data.backbone.length ; index++) {
                 cyData.push({ group:'edges', data: { 
-                	id:"backbone" + index, 
+                	id:data.backbone[index].id, 
                 	source:data.backbone[index].from, 
                 	target:data.backbone[index].to,
                 	label: "backbone: " + data.backbone[index].of,
@@ -120,7 +119,6 @@ const App = {
         App.cy.add(cyData);
         
         App.cy.layout({ name: 'cose'}).run();
-
     },
 
     renderCircleDiagram: function(structureData) {
@@ -201,7 +199,7 @@ const App = {
             						
             	}
         	}
-            App.circos.chords("links_"+structureData.genes[index].geneIdentifier.replace(/[\|\.]/g,"_"), data, {color:colors.pick(),
+            App.circos.chords("links_"+structureData.genes[index].name.replace(/[\|\.]/g,"_"), data, {color:colors.pick(),
                 tooltipContent: function (datum, index) {
                     return "";
                   }});
@@ -220,6 +218,7 @@ const App = {
     init(config) {
     
         App.geneStructure = geneStructure;
+
         App.cy = cytoscape({
             container: document.getElementById('cy'),
             elements: [
@@ -264,6 +263,8 @@ const App = {
             }
         });
 
+        App.cytoscapeContextMenu = cytoscapeContextMenus.create(App.cy);
+        
         geneIdentifierSubject.subscribe((req) => App.getGeneStructure(req.geneId,req.distance));
         geneIdentifierSubject.subscribe((req) => console.log("gene identifier is: "  + JSON.stringify(req)));
         geneIdentifierSubject.subscribe((req) => App.getPathwayInformation(req.geneId));

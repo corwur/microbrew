@@ -5,6 +5,7 @@ import corwur.microbrew.neo4j.ApplicationException;
 import corwur.microbrew.neo4j.CypherClient;
 import corwur.microbrew.structure.model.*;
 import org.neo4j.driver.v1.Value;
+import org.neo4j.driver.v1.Values;
 import org.neo4j.driver.v1.types.Node;
 import org.neo4j.driver.v1.types.Relationship;
 
@@ -52,14 +53,14 @@ public class GeneStructureRepository {
         try (CypherClient cypherClient = new CypherClient(uri, user, password)) {
             var root = getGeneById(geneIdentifier, cypherClient).orElseThrow(ApplicationException::new);
             var genes = getGenes(geneIdentifier, distance, cypherClient);
-            genes.put(root.geneIdentifier, root);
+            genes.put(root.name, root);
             var organisms = getOrganisms(genes, cypherClient);
             var sequences = getSequences(genes, cypherClient);
             var order = getOrderLinks(genes, cypherClient);
             var backbone = getBackboneLinks(genes, cypherClient);
 
             for (Gene gene : genes.values()) {
-                var on = getOnLinks(gene.geneIdentifier, cypherClient);
+                var on = getOnLinks(gene.name, cypherClient);
                 gene.on.addAll(on);
             }
 
@@ -132,7 +133,7 @@ public class GeneStructureRepository {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("genes", genes.keySet());
         var result = cypherClient.runQuery(GET_ORDER_LINKS, parameters);
-        return result.stream().map(this::createOrderLnk).collect(Collectors.toList());
+        return result.stream().map(this::createOrderLink).collect(Collectors.toList());
     }
 
     private List<Backbone> getBackboneLinks(Map<String, Gene> genes, CypherClient cypherClient) throws IOException {
@@ -145,31 +146,34 @@ public class GeneStructureRepository {
 
     private Gene createGene(Map<String, Object> result) {
         return new Gene(
-                get(result, "g", "name").map(Value::asString).orElse("")
+                get(result, "g", "name").map(Value::asString).orElse(""),
+                get(result, "g", "id").map(Value::asLong).orElse(10l)
         );
     }
 
     private On createOnLink(Map<String, Object> result) {
         return new On(
-                get(result, "g", "name").map(Value::asString).orElse(""),
-                get(result, "s", "name").map(Value::asString).orElse(""),
+                get(result, "g", "id").map(Value::asLong).orElse(0l),
                 get(result, "s", "id").map(Value::asLong).orElse(0l),
+                getRelationship(result, "r", "id", Value::asLong).orElse(0l),
                 getRelationship(result, "r", "start", Value::asLong).orElse(0l),
                 getRelationship(result, "r", "end", Value::asLong).orElse(0l)
         );
     }
 
-    private Order createOrderLnk(Map<String, Object> result) {
+    private Order createOrderLink(Map<String, Object> result) {
         return new Order(
-                get(result, "g", "name").map(Value::asString).orElse(""),
-                get(result, "t", "name").map(Value::asString).orElse(""),
+                get(result, "g", "id").map(Value::asLong).orElse(0l),
+                get(result, "t", "id").map(Value::asLong).orElse(0l),
+                getRelationship(result, "r", "id", Value::asLong).orElse(0l),
                 getRelationship(result, "r", "in", Value::asString).orElse("N/A"));
     }
 
     private Backbone createBackboneLink(Map<String, Object> result) {
         return new Backbone(
-                get(result, "g", "name").map(Value::asString).orElse(""),
-                get(result, "t", "name").map(Value::asString).orElse(""),
+                get(result, "g", "id").map(Value::asLong).orElse(0l),
+                get(result, "t", "id").map(Value::asLong).orElse(0l),
+                getRelationship(result, "r", "id", Value::asLong).orElse(0l),
                 getRelationship(result, "r", "of", Value::asLong).orElse(0l)
         );
     }
@@ -185,7 +189,8 @@ public class GeneStructureRepository {
 
     private Organism createOrganism(Map<String, Object> result) {
         return new Organism(
-                get(result, "o", "name").map(Value::asString).orElse("")
+                get(result, "o", "name").map(Value::asString).orElse(""),
+                get(result, "o", "id").map(Value::asLong).orElse(0l)
         );
     }
 

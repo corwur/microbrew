@@ -5,9 +5,10 @@
    <title>Microbrewery</title>
    <link rel="stylesheet" type="text/css" href="css/main.min.css">
    <link rel="stylesheet" type="text/css" href="css/vendor.css">
+   <link rel="stylesheet" type="text/css" href="css/app.css">
    <script src="js/vendor.js"></script>
    <script src="app.js"></script>
-   <script type="text/javascript" language="javascript" src="https://reactome.org/DiagramJs/diagram/diagram.nocache.js"></script>
+   <script type="text/javascript" src="https://reactome.org/DiagramJs/diagram/diagram.nocache.js"></script>
 </head>
 <div class="container">
    <nav class="avbar navbar-expand-lg navbar-light bg-light">
@@ -33,7 +34,7 @@
                           onkeyup="App.findGene(this)">
                    <div id="gene-id-autocomplete"></div>
                </div>
-               <input class="form-control"  style="max-width: 80pt" id="distance" name="Distance" type="number" placeholder="Distance">
+               <input class="form-control"  value="1" style="max-width: 80pt" id="distance" name="Distance" type="number" placeholder="Distance">
                <input type="submit" value="Show">
            </form>
        </div>
