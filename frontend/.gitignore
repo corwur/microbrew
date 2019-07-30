@@ -2,6 +2,11 @@
 target
 node_modules/
 public/
+<<<<<<< HEAD
 /.Rhistory
 /.project
 /.classpath
+=======
+/.classpath
+/.project
+>>>>>>> refs/remotes/origin/neo4j

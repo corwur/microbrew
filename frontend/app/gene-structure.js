@@ -1,5 +1,5 @@
-const rx = require("rxjs")
-const axios = require("axios")
+const rx = require("rxjs");
+const axios = require("axios");
 
 const GeneStructure = {
 

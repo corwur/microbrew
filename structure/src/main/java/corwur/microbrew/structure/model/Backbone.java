@@ -2,25 +2,31 @@ package corwur.microbrew.structure.model;
 
 public class Backbone {
 
-    public final String from;
-    public final String to;
+    public final long from;
+    public final long to;
     public final long of;
+    public final long id;
     
-    public Backbone(String from, String to, long of) {
+
+	public Backbone(long from, long to, long id, long of) {
         this.from = from;
         this.to = to;
         this.of = of;
+        this.id = id;
     }
 
-    public String getFrom() {
+    public long getFrom() {
         return from;
     }
 
-    public String getTo() {
+    public long getTo() {
         return to;
     }
     
     public long getOf() {
     	return of;
     }
+    public long getId() {
+		return id;
+	}
 }

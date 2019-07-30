@@ -2,8 +2,6 @@ package lychee;
 
 import com.sun.net.httpserver.HttpContext;
 
-import java.util.function.Supplier;
-
 public class Context {
 
     private final HttpContext httpContext;

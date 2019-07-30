@@ -1,24 +1,29 @@
 package corwur.microbrew.structure.model;
 
 public class Order {
-    public final String from;
-    public final String to;
+    public final long from;
+    public final long to;
+    public final long id;
     public final String organism;
 
-    public Order(String from, String to, String organism) {
+    public Order(long from, long to, long id, String organism) {
         this.from = from;
         this.to = to;
+        this.id = id;
         this.organism = organism;
     }
 
-    public String getFrom() {
+    public long getFrom() {
         return from;
     }
 
-    public String getTo() {
+    public long getTo() {
         return to;
     }
 
+    public long getId() {
+    	return id;
+    }
     public String getOrganism() {
         return organism;
     }
