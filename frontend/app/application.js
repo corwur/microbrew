@@ -231,7 +231,7 @@ const App = {
                     	'width':6,
                     	'height':6,
                         'background-color': "green",
-                        'label': 'data(id)'
+                        'label': 'data(label)'
                     }
                 },
                 {
@@ -251,10 +251,10 @@ const App = {
                         'target-arrow-color': 'lightblue',
                         'target-arrow-shape': 'triangle',
                         "curve-style": "bezier",
-                        label:"data(label)",
-                        width:"mapData(weight, 0, 100, 2, 10)"
+                        label:"data(label)"//,
+                        //width:"mapData(weight, 0, 100, 2, 10)"
                     }
-                }
+                },
             ],
 
             layout: {

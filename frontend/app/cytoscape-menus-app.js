@@ -32,15 +32,23 @@ const CytoscapeContextMenus = {
 	expandGraph : function(event, data) {
         const convertToCyData = function(data) {
             var cyData = []
-            for(var index =0; index < data.nodeTable.length ; index++) {
-                cyData.push({ group:'nodes', data:  data.nodes[0] } );
+            for(var node in data.nodeTable) {
+            	if (data.nodeTable[node]["id"]) {
+            		cyData.push({ group:'nodes', data:  {
+            			"label" : data.nodeTable[node]["properties"].name,
+            			"name" : data.nodeTable[node]["properties"].name,
+            			"id" : data.nodeTable[node]["properties"].id,
+            			"type": data.nodeTable[node].labels[0]
+            			}} );
+            	}
+                //cyData.push({ group:'nodes', data:  data.nodes[0] } );
             }
-            for(var index =0; index < data.edgeTable.length ; index++) {
+            for(var edge in data.edgeTable) {
                 cyData.push({ group:'edges', data: { 
-                	id:data.edges[index].id, 
-                	source:data.edges[index].from, 
-                	target:data.edges[index].to,
-                	label: data.edges[index].label
+                	id:data.edgeTable[edge].id, 
+                	source:data.edgeTable[edge].start, 
+                	target:data.edgeTable[edge].end,
+                	label: data.edgeTable[edge].type
                 	}} );
             }
 
