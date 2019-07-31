@@ -9,6 +9,21 @@ const CytoscapeContextMenus = {
 		target.remove();
 	},
 	
+	getExpandNodeLabelMenu : function(event) {
+		var target = event.target || event.cyTarget;
+
+		return new rx.Observable( ( observer ) => {
+            axios.get( '/api/neo4j/node/menu/labels' + target.id())
+                .then( ( response ) => {
+                    observer.next( response.data );
+                    observer.complete();
+                } )
+                .catch( ( error ) => {
+                    observer.error( error );
+                } );
+        });
+	},
+	
 	expandNodeQuery : function(event) {
 		var target = event.target || event.cyTarget;
 

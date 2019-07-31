@@ -4,6 +4,7 @@ import java.io.IOException;
 
 
 import corwur.microbrew.neo4j.tasks.ExpandNodeTask;
+import corwur.microbrew.neo4j.tasks.MenuLabelTask;
 import lychee.Context;
 import lychee.Lychee;
 import lychee.LycheeException;
@@ -33,6 +34,17 @@ public class Neo4jApplication {
 				response.internalServerError("Error executing expand node task");
 			}
         }));
+        context.get(Lychee.regex("/node/menu/labels/(?<nodeId>\\w*)$"), ((request, response) -> {
+        	var nodeIdentifier = request.get("nodeId").map(NodeIdentifier::new).orElseThrow(IllegalArgumentException::new);
+        	MenuLabelTask menuLabelTask = new MenuLabelTask(neo4jClient, nodeIdentifier.getId());
+            try {
+            	menuLabelTask.createMenuItem();
+				response.ok(menuLabelTask.getMenu());
+			} catch (Exception e) {
+				response.internalServerError("Error executing expand menu label task");
+			}
+        }));
+
         server.start();
     }
 

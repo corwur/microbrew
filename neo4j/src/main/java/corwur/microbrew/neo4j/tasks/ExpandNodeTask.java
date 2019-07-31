@@ -9,20 +9,13 @@ import nl.corwur.cytoscape.neo4j.internal.neo4j.Neo4jClient;
 import nl.corwur.cytoscape.neo4j.internal.neo4j.Neo4jClientException;
 
 
-public class ExpandNodeTask {
+public class ExpandNodeTask extends NodeTask{
 	
-	public enum Direction {
-		IN,
-		OUT,
-        BIDIRECTIONAL
-    }
     private String edge;
     private String node;
-	private Direction direction;
-	private long id;
-	private Neo4jClient client;
     
 	public ExpandNodeTask(Neo4jClient client, long id) {
+		super(client, id);
 		this.id = id;
 		this.edge = null;
 		this.node = null;
