@@ -4,7 +4,9 @@ import java.io.IOException;
 
 
 import corwur.microbrew.neo4j.tasks.ExpandNodeTask;
+import corwur.microbrew.neo4j.tasks.MenuEdgesTask;
 import corwur.microbrew.neo4j.tasks.MenuLabelTask;
+import corwur.microbrew.neo4j.tasks.NodeTask.Direction;
 import lychee.Context;
 import lychee.Lychee;
 import lychee.LycheeException;
@@ -44,6 +46,46 @@ public class Neo4jApplication {
 				response.internalServerError("Error executing expand menu label task");
 			}
         }));
+        context.get(Lychee.regex("/node/menu/edges/(?<nodeId>\\w*)$"), ((request, response) -> {
+        	var nodeIdentifier = request.get("nodeId").map(NodeIdentifier::new).orElseThrow(IllegalArgumentException::new);
+        	MenuEdgesTask menuEdgesTask = new MenuEdgesTask(neo4jClient, nodeIdentifier.getId());
+            try {
+            	menuEdgesTask.createMenuItem();
+				response.ok(menuEdgesTask.getMenu());
+			} catch (Exception e) {
+				response.internalServerError("Error executing expand menu edge task");
+			}
+        }));
+
+        context.get(Lychee.regex("/node/expand/node/(?<nodeId>\\w*)$"), ((request, response) -> {
+        	var nodeIdentifier = request.get("nodeId").map(NodeIdentifier::new).orElseThrow(IllegalArgumentException::new);
+        	var label = request.get("label").map(String::new).orElseThrow(IllegalArgumentException::new);
+        	var direction = request.get("direction").map(String::new).orElseThrow(IllegalArgumentException::new);
+        	ExpandNodeTask expandNodeTask = new ExpandNodeTask(neo4jClient, nodeIdentifier.getId());
+        	expandNodeTask.setNode(label);
+        	expandNodeTask.setDirection(direction);
+        	
+            try {
+            	response.ok(expandNodeTask.expand());
+			} catch (Exception e) {
+				response.internalServerError("Error executing expand menu label task");
+			}
+        }));
+
+        context.get(Lychee.regex("/node/expand/edge/(?<nodeId>\\w*)$"), ((request, response) -> {
+        	var nodeIdentifier = request.get("nodeId").map(NodeIdentifier::new).orElseThrow(IllegalArgumentException::new);
+        	var label = request.get("label").map(String::new).orElseThrow(IllegalArgumentException::new);
+        	var direction = request.get("direction").map(String::new).orElseThrow(IllegalArgumentException::new);
+        	ExpandNodeTask expandNodeTask = new ExpandNodeTask(neo4jClient, nodeIdentifier.getId());
+        	expandNodeTask.setEdge(label);
+        	expandNodeTask.setDirection(direction);
+            try {
+            	response.ok(expandNodeTask.expand());
+			} catch (Exception e) {
+				response.internalServerError("Error executing expand menu label task");
+			}
+        }));
+
 
         server.start();
     }

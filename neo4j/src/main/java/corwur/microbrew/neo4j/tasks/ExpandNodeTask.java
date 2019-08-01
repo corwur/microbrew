@@ -3,6 +3,7 @@ package corwur.microbrew.neo4j.tasks;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import corwur.microbrew.neo4j.tasks.NodeTask.Direction;
 import nl.corwur.cytoscape.neo4j.internal.graph.Graph;
 import nl.corwur.cytoscape.neo4j.internal.neo4j.CypherQuery;
 import nl.corwur.cytoscape.neo4j.internal.neo4j.Neo4jClient;
@@ -71,4 +72,13 @@ public class ExpandNodeTask extends NodeTask{
             throw new IllegalStateException(e.getMessage(), e);
         }
     }
+
+	public void setDirection(String direction) {
+    	if (direction == "BIDIRECTIONAL")
+    		setDirection(Direction.BIDIRECTIONAL);
+    	if (direction == "IN")
+    		setDirection(Direction.IN);
+    	if (direction == "OUT")
+    		setDirection(Direction.OUT);
+	}
 }

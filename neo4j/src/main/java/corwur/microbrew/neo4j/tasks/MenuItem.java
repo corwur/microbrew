@@ -6,18 +6,18 @@ import corwur.microbrew.neo4j.tasks.NodeTask.Direction;
 
 public class MenuItem {
 	private final ArrayList<Direction> directions = new ArrayList<>();
-	private final String nodeLabel;
+	private final String label;
 	
-	public MenuItem(String nodeLabel) {
-		this.nodeLabel = nodeLabel.replaceAll("[`]+", "");
+	public MenuItem(String label) {
+		this.label = label.replaceAll("[`]+", "");
 	}
 	
 	public void addDirection(Direction direction) {
 		this.directions.add(direction);
 	}
 	
-	public String getNodeLabel() {
-		return nodeLabel;
+	public String getLabel() {
+		return label;
 	}
 	
 	public ArrayList<Direction> getDirections(){

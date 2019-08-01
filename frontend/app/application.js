@@ -58,9 +58,13 @@ const App = {
 
     },
 
-    expandNodeLabelMenu : function(event) {
-    	var observable = App.cytoscapeContextMenus.getExpandNodeLabelMenu(event).pipe(rx_operators.share());
-    	observable.subscribe(App.cytoscapeContextMenus.createExpandNodeLabelMenu); 
+    expandNodeLabelsMenu : function(event) {
+    	var observable = App.cytoscapeContextMenus.getExpandNodeLabelsMenu(event).pipe(rx_operators.share());
+    	observable.subscribe(App.cytoscapeContextMenus.createExpandNodeLabelsMenu); 
+    },
+    expandNodeEdgesMenu : function(event) {
+    	var observable = App.cytoscapeContextMenus.getExpandNodeEdgesMenu(event).pipe(rx_operators.share());
+    	observable.subscribe(App.cytoscapeContextMenus.createExpandNodeEdgesMenu); 
     },
     
     
@@ -111,7 +115,7 @@ const App = {
                 	id:data.backbone[index].id, 
                 	source:data.backbone[index].from, 
                 	target:data.backbone[index].to,
-                	label: "backbone: " + data.backbone[index].of,
+                	label: "backbone",
                 	of: data.backbone[index].of,
                 	weight: data.backbone[index].of}} )
             }
@@ -275,7 +279,8 @@ const App = {
         geneIdentifierSubject.subscribe((req) => App.getPathwayInformation(req.geneId));
         App.cy.on('cxttapstart','node', function(event) { 
         	App.cytoscapeContextMenus.removeAddedMenuItems();
-        	App.expandNodeLabelMenu(event);
+        	App.expandNodeLabelsMenu(event);
+        	App.expandNodeEdgesMenu(event);
         	});
         
         console.log('App initialized.');
