@@ -9,7 +9,7 @@ public class MenuItem {
 	private final String nodeLabel;
 	
 	public MenuItem(String nodeLabel) {
-		this.nodeLabel = nodeLabel;
+		this.nodeLabel = nodeLabel.replaceAll("[`]+", "");
 	}
 	
 	public void addDirection(Direction direction) {

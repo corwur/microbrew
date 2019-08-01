@@ -58,6 +58,12 @@ const App = {
 
     },
 
+    expandNodeLabelMenu : function(event) {
+    	var observable = App.cytoscapeContextMenus.getExpandNodeLabelMenu(event).pipe(rx_operators.share());
+    	observable.subscribe(App.cytoscapeContextMenus.createExpandNodeLabelMenu); 
+    },
+    
+    
     showPathway: function(pathway) {
     	for (var index=0; index < 1; index++) { //pathway.length
 			var name = pathway[index].stId;
@@ -263,11 +269,14 @@ const App = {
         });
 
         App.cytoscapeContextMenu = cytoscapeContextMenus.create(App.cy);
-        
+        App.cytoscapeContextMenus = cytoscapeContextMenus
         geneIdentifierSubject.subscribe((req) => App.getGeneStructure(req.geneId,req.distance));
         geneIdentifierSubject.subscribe((req) => console.log("gene identifier is: "  + JSON.stringify(req)));
         geneIdentifierSubject.subscribe((req) => App.getPathwayInformation(req.geneId));
-        //App.cy.on('tap','node', function(event) { console.log(event.target.id()); App.getPathwayInformation(event.target.id());});
+        App.cy.on('cxttapstart','node', function(event) { 
+        	App.cytoscapeContextMenus.removeAddedMenuItems();
+        	App.expandNodeLabelMenu(event);
+        	});
         
         console.log('App initialized.');
 
