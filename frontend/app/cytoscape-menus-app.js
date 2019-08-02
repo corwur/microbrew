@@ -31,7 +31,7 @@ const CytoscapeContextMenus = {
 		var eventFactory = {};
 		for (var item in data) {
 			for (var direction of data[item].directions) {
-				var menuTitle = "Expand";
+				var menuTitle = "";
 				var functionName = 'expand_' + type + '_' + data[item].nodeLabel + '_' + direction;
 				eventFactory[functionName] = function(event) {
 					var observable = CytoscapeContextMenus.expandNodeOnQuery(event, arguments.callee).pipe(rx_operators.share());
@@ -43,9 +43,9 @@ const CytoscapeContextMenus = {
 				
 				if (direction == "IN") {
 					if (type == 'node')
-						menuTitle += " from ";
+						menuTitle += "From node(s) ";
 					else
-						menuTitle += " incoming edges "
+						menuTitle += "Incoming edge(s) "
 					var menuItem = {
 						id: 'expand_' + type + '_' + data[item].label + '_' + direction,
 						content: menuTitle + '<b>' + data[item].label  + "</b>",
@@ -59,9 +59,9 @@ const CytoscapeContextMenus = {
 				}
 				if (direction == "OUT") {
 					if (type == 'node')
-						menuTitle += " to ";
+						menuTitle += "To node(s) ";
 					else
-						menuTitle += " outgoing edges "
+						menuTitle += "Outgoing edge(s) "
 
 					var menuItem = {
 						id: 'expand_' + type + '_' + data[item].label + '_' + direction,
@@ -78,9 +78,9 @@ const CytoscapeContextMenus = {
 			if (data[item].directions.length ==2) {
 				var menuTitle = "";
 				if (type == 'node')
-					menuTitle = " Expand to/from ";
+					menuTitle = "To/from node(s) ";
 				else
-					menuTitle = " Expand in-/outgoing edges "
+					menuTitle = "In-/outgoing edge(s) ";
 				var functionName = 'expand_' + type + '_' + data[item].label;
 				eventFactory[functionName] = function(event) {
 					var observable = CytoscapeContextMenus.expandNodeOnQuery(event, arguments.callee).pipe(rx_operators.share());

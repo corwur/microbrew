@@ -191,19 +191,21 @@ const App = {
         var colors = new Colors(); 
         for (var index =0; index < structureData.genes.length; index++){
             data = [];
+            
         	for (var source=0; source < structureData.genes[index].on.length; source++){
             	for (var target=source+1; target < structureData.genes[index].on.length; target++){
-            		if (contigs.has(structureData.genes[index].on[source].id) && contigs.has(structureData.genes[index].on[target].id) ) 
-            		data.push({
+            		if (contigs.has(structureData.genes[index].on[source].sequenceID) && contigs.has(structureData.genes[index].on[target].sequenceID) ) { 
+            			data.push({
             					source:{
-            						id:""+structureData.genes[index].on[source].id, 
+            						id:""+structureData.genes[index].on[source].sequenceID, 
             						start:structureData.genes[index].on[source].start,
             						end:structureData.genes[index].on[source].end},
             					target:{
-            						id:""+structureData.genes[index].on[target].id, 
+            						id:""+structureData.genes[index].on[target].sequenceID, 
             						start:structureData.genes[index].on[target].start,
             						end:structureData.genes[index].on[target].end},
             					})
+            		}
             		
             						
             	}
