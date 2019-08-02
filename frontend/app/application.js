@@ -8,6 +8,7 @@ var pileup = require('pileup');
 var cytoscape = require('cytoscape');
 var cytoscapeContextMenus = require('cytoscape-menus-app');
 var contextMenus = require('cytoscape-context-menus');
+var graphTable = require('graph-table');
 var geneStructure = require('gene-structure');
 var reactome = require('reactome');
 var circos = require('circos');
@@ -284,6 +285,12 @@ const App = {
         	App.expandNodeLabelsMenu(event);
         	App.expandNodeEdgesMenu(event);
         	});
+        App.cy.on('click', 'node', function(event) {
+        	graphTable.nodeTable(event);
+        });
+        App.cy.on('click', 'edge', function(event) {
+        	graphTable.edgeTable(event);
+        });
         
         console.log('App initialized.');
 
