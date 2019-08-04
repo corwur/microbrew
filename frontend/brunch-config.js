@@ -3,7 +3,7 @@ module.exports = {
         javascripts: {
             joinTo: {
                 'app.js' : 'app/*.js',
-                'js/vendor.js': /^node_modules/
+                'js/vendor.js': /^node_modules/ 
 
             },
         },
@@ -11,7 +11,7 @@ module.exports = {
             joinTo: {
                 'css/main.min.css': 'app/styles/main.scss',
                 'css/app.css': 'app/styles/*.css',
-                'css/vendor.css': /^node_modules/
+                'css/vendor.css': /^node_modules/ 
             }
         }
     },
@@ -22,6 +22,10 @@ module.exports = {
         babel: {presets: ['latest']}
     },
     npm: {
-        styles: {bootstrap: ['dist/css/bootstrap.css']},
+        styles: {
+        	'bootstrap': ['dist/css/bootstrap.css'],  
+        	'tabulator-tables': ['dist/css/tabulator.min.css'],
+        	"cytoscape-context-menus": ['cytoscape-context-menus.css']},
+        
     }
 };

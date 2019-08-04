@@ -17,61 +17,86 @@ const CytoscapeContextMenus = {
 		CytoscapeContextMenus.addedMenuItems = [];
 	},
 	
-	createExpandNodeLabelMenu: function(data) {
+	createExpandNodeLabelsMenu: function(data) {
+		CytoscapeContextMenus.createExpandNodeMenu(data, "node");
+	},
+	createExpandNodeEdgesMenu: function(data) {
+		CytoscapeContextMenus.createExpandNodeMenu(data, "edge");
+	},
+
+	createExpandNodeMenu: function(data, type) {
 		if (!CytoscapeContextMenus.addedMenuItems) {
 			CytoscapeContextMenus.addedMenuItems = [];
 		}
+		var eventFactory = {};
 		for (var item in data) {
 			for (var direction of data[item].directions) {
-				var functionName = 'expand_node_' + data[item].nodeLabel + '_' + direction;
-				window[functionName] = function(event) {
-					console.log(arguments.callee);
+				var menuTitle = "";
+				var functionName = 'expand_' + type + '_' + data[item].nodeLabel + '_' + direction;
+				eventFactory[functionName] = function(event) {
+					var observable = CytoscapeContextMenus.expandNodeOnQuery(event, arguments.callee).pipe(rx_operators.share());
+					observable.subscribe(data => CytoscapeContextMenus.expandGraph(event, data));
 				}
-				window[functionName].target = {};
-				window[functionName].target[item] = data[item];
-				window[functionName].direction = direction;
+				eventFactory[functionName].target = item;
+				eventFactory[functionName].direction = [direction];
+				eventFactory[functionName].type = type;
 				
 				if (direction == "IN") {
+					if (type == 'node')
+						menuTitle += "From node(s) ";
+					else
+						menuTitle += "Incoming edge(s) "
 					var menuItem = {
-						id: 'expand_node_' + data[item].nodeLabel + '_' + direction,
-						content: 'Expand from <b>' + data[item].nodeLabel  + "</b>",
-						toolTipText: 'Expand from ' + data[item].nodeLabel,
+						id: 'expand_' + type + '_' + data[item].label + '_' + direction,
+						content: menuTitle + '<b>' + data[item].label  + "</b>",
+						toolTipText: menuTitle + data[item].label,
 						selector: 'node',
 						show: true,
-						onClickFunction : window[functionName]
+						onClickFunction : eventFactory[functionName]
 					};
 					App.cytoscapeContextMenu.appendMenuItem(menuItem);
 					CytoscapeContextMenus.addedMenuItems.push(menuItem.id);
 				}
 				if (direction == "OUT") {
+					if (type == 'node')
+						menuTitle += "To node(s) ";
+					else
+						menuTitle += "Outgoing edge(s) "
 
 					var menuItem = {
-						id: 'expand_node_' + data[item].nodeLabel + '_' + direction,
-						content: 'Expand to <b>' + data[item].nodeLabel  + "</b>",
-						toolTipText: 'Expand to ' + data[item].nodeLabel,
+						id: 'expand_' + type + '_' + data[item].label + '_' + direction,
+						content: menuTitle + '<b>' + data[item].label  + "</b>",
+						toolTipText: menuTitle + data[item].label,
 						selector: 'node',
 						show: true,
-						onClickFunction : window[functionName] 
+						onClickFunction : eventFactory[functionName] 
 					};
 					App.cytoscapeContextMenu.appendMenuItem(menuItem);
 					CytoscapeContextMenus.addedMenuItems.push(menuItem.id);
 				}
 			}
 			if (data[item].directions.length ==2) {
-				var functionName = 'expand_node_' + data[item].nodeLabel;
-				window[functionName] = function(event) {
-					console.log(arguments.callee);
+				var menuTitle = "";
+				if (type == 'node')
+					menuTitle = "To/from node(s) ";
+				else
+					menuTitle = "In-/outgoing edge(s) ";
+				var functionName = 'expand_' + type + '_' + data[item].label;
+				eventFactory[functionName] = function(event) {
+					var observable = CytoscapeContextMenus.expandNodeOnQuery(event, arguments.callee).pipe(rx_operators.share());
+					observable.subscribe(data => CytoscapeContextMenus.expandGraph(event, data));
 				}
-				window[functionName].target = {};
-				window[functionName].target[item] = data[item];
+				eventFactory[functionName].target = item;
+				eventFactory[functionName].direction = data[item].directions;
+				eventFactory[functionName].type = type;
 
 				var menuItem = {
-						id: 'expand_node_' + data[item].nodeLabel + '_both',
-						content: 'Expand to/from <b>' + data[item].nodeLabel + "</b>",
-						toolTipText: 'Expand to/from ' + data[item].nodeLabel,
+						id: 'expand_' + type + '_' + data[item].label + '_both',
+						content: menuTitle + '<b>' + data[item].label + "</b>",
+						toolTipText: menuTitle + data[item].label,
 						selector: 'node',
 						show: true,
-						onClickFunction : window[functionName]
+						onClickFunction : eventFactory[functionName]
 					};
 					App.cytoscapeContextMenu.appendMenuItem(menuItem);
 					CytoscapeContextMenus.addedMenuItems.push(menuItem.id);
@@ -80,11 +105,17 @@ const CytoscapeContextMenus = {
 		}
 	},
 	
-	getExpandNodeLabelMenu : function(event) {
+	getExpandNodeLabelsMenu : function(event) {
+		return CytoscapeContextMenus.getExpandNodeMenu(event, "labels");
+	},
+	getExpandNodeEdgesMenu : function(event) {
+		return CytoscapeContextMenus.getExpandNodeMenu(event, "edges"); 
+	},
+	getExpandNodeMenu : function(event, type) {
 		var target = event.target || event.cyTarget;
 
 		return new rx.Observable( ( observer ) => {
-            axios.get( '/api/neo4j/node/menu/labels/' + target.id())
+            axios.get( '/api/neo4j/node/menu/' + type + '/' + target.id())
                 .then( ( response ) => {
                     observer.next( response.data );
                     observer.complete();
@@ -94,6 +125,31 @@ const CytoscapeContextMenus = {
                 } );
         });
 	},
+	
+	expandNodeOnQuery : function (event, callee){
+		var type = callee.type;
+		var target = event.target || event.cyTarget;
+		var direction;
+		if (callee.direction.length == 2) {
+			direction = "BIDIRECTIONAL";
+		}
+		else {
+			direction = callee.direction[0];
+		}
+			
+		return new rx.Observable( ( observer ) => {
+			axios.get( '/api/neo4j/node/expand/' + type + '/' + target.id(), {params: {'label': callee.target, 'direction': direction}} )
+			.then( ( response ) => {
+				observer.next( response.data );
+				observer.complete();
+			} )
+			.catch( ( error ) => {
+				observer.error( error );
+			} );
+	     });
+
+	},
+
 	
 	expandNodeQuery : function(event) {
 		var target = event.target || event.cyTarget;
@@ -115,6 +171,8 @@ const CytoscapeContextMenus = {
 		observable.subscribe(data => CytoscapeContextMenus.expandGraph(event, data));
 	},
 
+	
+	
 	expandGraph : function(event, data) {
         const convertToCyData = function(data) {
             var cyData = []

@@ -21,7 +21,8 @@
     "popper.js": "^1.14.7",
     "rxjs": "^6.5.1",
     "sass-brunch": "^2.10.8",
-    "webpack": "^4.29.1"
+    "webpack": "^4.29.1",
+    "tabulator-tables": "^4.3"
   },
   "devDependencies": {
     "elm-brunch": "^0.12.0",

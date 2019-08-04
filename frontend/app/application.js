@@ -8,6 +8,7 @@ var pileup = require('pileup');
 var cytoscape = require('cytoscape');
 var cytoscapeContextMenus = require('cytoscape-menus-app');
 var contextMenus = require('cytoscape-context-menus');
+var graphTable = require('graph-table');
 var geneStructure = require('gene-structure');
 var reactome = require('reactome');
 var circos = require('circos');
@@ -58,9 +59,13 @@ const App = {
 
     },
 
-    expandNodeLabelMenu : function(event) {
-    	var observable = App.cytoscapeContextMenus.getExpandNodeLabelMenu(event).pipe(rx_operators.share());
-    	observable.subscribe(App.cytoscapeContextMenus.createExpandNodeLabelMenu); 
+    expandNodeLabelsMenu : function(event) {
+    	var observable = App.cytoscapeContextMenus.getExpandNodeLabelsMenu(event).pipe(rx_operators.share());
+    	observable.subscribe(App.cytoscapeContextMenus.createExpandNodeLabelsMenu); 
+    },
+    expandNodeEdgesMenu : function(event) {
+    	var observable = App.cytoscapeContextMenus.getExpandNodeEdgesMenu(event).pipe(rx_operators.share());
+    	observable.subscribe(App.cytoscapeContextMenus.createExpandNodeEdgesMenu); 
     },
     
     
@@ -111,7 +116,7 @@ const App = {
                 	id:data.backbone[index].id, 
                 	source:data.backbone[index].from, 
                 	target:data.backbone[index].to,
-                	label: "backbone: " + data.backbone[index].of,
+                	label: "backbone",
                 	of: data.backbone[index].of,
                 	weight: data.backbone[index].of}} )
             }
@@ -187,19 +192,21 @@ const App = {
         var colors = new Colors(); 
         for (var index =0; index < structureData.genes.length; index++){
             data = [];
+            
         	for (var source=0; source < structureData.genes[index].on.length; source++){
             	for (var target=source+1; target < structureData.genes[index].on.length; target++){
-            		if (contigs.has(structureData.genes[index].on[source].id) && contigs.has(structureData.genes[index].on[target].id) ) 
-            		data.push({
+            		if (contigs.has(structureData.genes[index].on[source].sequenceID) && contigs.has(structureData.genes[index].on[target].sequenceID) ) { 
+            			data.push({
             					source:{
-            						id:""+structureData.genes[index].on[source].id, 
+            						id:""+structureData.genes[index].on[source].sequenceID, 
             						start:structureData.genes[index].on[source].start,
             						end:structureData.genes[index].on[source].end},
             					target:{
-            						id:""+structureData.genes[index].on[target].id, 
+            						id:""+structureData.genes[index].on[target].sequenceID, 
             						start:structureData.genes[index].on[target].start,
             						end:structureData.genes[index].on[target].end},
             					})
+            		}
             		
             						
             	}
@@ -275,8 +282,15 @@ const App = {
         geneIdentifierSubject.subscribe((req) => App.getPathwayInformation(req.geneId));
         App.cy.on('cxttapstart','node', function(event) { 
         	App.cytoscapeContextMenus.removeAddedMenuItems();
-        	App.expandNodeLabelMenu(event);
+        	App.expandNodeLabelsMenu(event);
+        	App.expandNodeEdgesMenu(event);
         	});
+        App.cy.on('click', 'node', function(event) {
+        	graphTable.nodeTable(event);
+        });
+        App.cy.on('click', 'edge', function(event) {
+        	graphTable.edgeTable(event);
+        });
         
         console.log('App initialized.');
 
