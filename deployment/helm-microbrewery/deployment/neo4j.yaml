@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: microbrewery-neo4j
+  labels:
+    app: microbrewery-neo4j
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: microbrewery-neo4j
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: microbrewery-neo4j
+    spec:
+      containers:
+        - image: 465129930157.dkr.ecr.eu-west-1.amazonaws.com/microbrewery-neo4j-repository:latest
+          imagePullPolicy: Always
+          name: microbrewery-neo4j
+          ports:
+            - containerPort: 8080
+              protocol: TCP

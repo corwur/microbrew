@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: microbrewery-structure
+  labels:
+    app: microbrewery-structure
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: microbrewery-structure
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: microbrewery-structure
+    spec:
+      containers:
+        - image: 465129930157.dkr.ecr.eu-west-1.amazonaws.com/microbrewery-structure-repository:latest
+          imagePullPolicy: Always
+          name: microbrewery-structure
+          ports:
+            - containerPort: 8080
+              protocol: TCP

@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: neo4j-server
+  labels:
+    app: neo4j-server
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: neo4j-server
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: neo4j-server
+    spec:
+      containers:
+        - image: neo4j:latest
+          imagePullPolicy: Always
+          name: neo4j-server
+          ports:
+            - containerPort: 7474
+              protocol: TCP
+            - conntainerPort: 7474
+              protocol: TCP
+            - conntainerPort: 7687
+              protocol: TCP
