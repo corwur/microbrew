@@ -21,9 +21,9 @@ spec:
         app: microbrewery-structure
     spec:
       containers:
-        - image: 465129930157.dkr.ecr.eu-west-1.amazonaws.com/microbrewery-structure-repository:latest
+        - image: 465129930157.dkr.ecr.eu-west-1.amazonaws.com/microbrewery-structure:SNAPSHOT-1.0
           imagePullPolicy: Always
           name: microbrewery-structure
           ports:
-            - containerPort: 8080
+            - containerPort: 8088
               protocol: TCP
