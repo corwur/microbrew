@@ -11,6 +11,20 @@
 
     <artifactId>structure</artifactId>
 
+    <profiles>
+      <profile>
+        <id>localhost</id>
+		<build>
+			<resources>
+				<resource>
+					<directory>src/main/resources-localhost</directory>
+				</resource>
+			</resources>
+		</build>
+      </profile>
+    </profiles>
+
+
     <dependencies>
         <dependency>
             <groupId>org.neo4j.driver</groupId>

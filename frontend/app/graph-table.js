@@ -4,7 +4,6 @@ const GraphTable = {
 		nodeTable : function(event) {
 			var node = event.target.data();
 			var edges = event.target.connectedEdges();
-			console.log(node);
 			var data = [];
 			for (var e=0; e < edges.length; e++) {
 				var connectedNodes = edges[e].connectedNodes();

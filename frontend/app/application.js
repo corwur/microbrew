@@ -69,32 +69,56 @@ const App = {
     },
     
     
-    showPathway: function(pathway) {
-    	for (var index=0; index < 1; index++) { //pathway.length
-			var name = pathway[index].stId;
-	        App.diagram.loadDiagram(name);
-	        App.diagram.onDiagramLoaded(function (loaded) {
-	            console.info("Loaded ", loaded);
-	            //diagram.flagItems("FYN");
-	            if (loaded == name) App.diagram.selectItem(name);
-	        });
+    showPathwayForCytoscape: function(pathway,node) {
+		var cyData = []
+    	for (var index=0; index < pathway.length; index++) { //pathway.length
+			cyData.push({ group:'nodes', data:  {
+			"label" : pathway[index].displayName,
+			"name" : pathway[index].displayName,
+			"id" : pathway[index].stId,
+			"type": "pathway",
+			origin:"reactome"
+			}});
+			cyData.push({ group:'edges', data: { 
+            	id:node.id + "_" + pathway[index].stId, 
+            	source:node.id, 
+            	target:pathway[index].stId,
+            	label: "in pathway",
+            	origin:"reactome"
+            	}} );
     	}    	
+		App.cy.add(cyData);
+        App.cy.layout({ name: 'cose'}).run();
     },
     
-    showPathways: function(gene) {
+  
+    showPathwaysForCytoscape: function(gene, node) {
     	for (var index=0; index < gene.results[0].entries.length; index++){
     		reactome.getPathway(gene.results[0].entries[index].stId).subscribe(
-    	            data => App.showPathway(data));
+    	            data => App.showPathwayForCytoscape(data,node));
     	}
     },
     
-    getPathwayInformation: function(geneIdentifier) {
-        var elem = document.getElementById("reactome");
-        reactome.findGene(geneIdentifier).subscribe(
-            data => App.showPathways(data),
-            error => elem.innerHTML = "No pathway data in reactome");
+    getPathwayInformation: function(event) {
+    	var data = event.target.data(); 
+    	if (data.origin == "reactome"){
+        	App.diagram.loadDiagram(data.id);
+        	App.diagram.onDiagramLoaded(function (loaded) {
+        		console.info("Loaded ", loaded);
+        		//diagram.flagItems("FYN");
+        		if (loaded == name) App.diagram.selectItem(name);
+    	       });
+
+    	}
     },
 
+    getPathwayInformationForCytoscape: function(node) {
+    	if (node.origin == "neo4j") {
+	        reactome.findGene(node.label).subscribe(
+	            data => App.showPathwaysForCytoscape(data, node));
+    	}
+    },
+    
     
     renderStructureGraph: function(data) {
         const convertToCyData = function(data) {
@@ -105,7 +129,8 @@ const App = {
                 	label:data.genes[index].name,
                 	id:data.genes[index].id, 
                 	weight:20, 
-                	selected:selected 
+                	selected:selected,
+                	origin:"neo4j"
                 	} } )
             }
             // for(var index =0; index < data.order.length ; index++) {
@@ -118,7 +143,8 @@ const App = {
                 	target:data.backbone[index].to,
                 	label: "backbone",
                 	of: data.backbone[index].of,
-                	weight: data.backbone[index].of}} )
+                	weight: data.backbone[index].of,
+                	origin:"neo4j"}} )
             }
 
             return cyData;
@@ -225,6 +251,7 @@ const App = {
             "width" : 900,
             "height" : 500
     	});
+    	App.diagram.onObjectSelected(function(obj) {console.log(obj)});
     },
 
     init(config) {
@@ -256,18 +283,36 @@ const App = {
                 	
                 },
                 {
+                    selector: 'node[origin = "reactome"]',
+                    style: {
+                        'background-color': 'red',
+                        'color' : 'red',
+                        'shape' : 'star'
+                    }
+                	
+                },
+                {
                     selector: 'edge',
                     style: {
                         'width': 1,
                         'font-size' : 2,
-                        'line-color': 'lightblue',
-                        'target-arrow-color': 'lightblue',
+                        'line-color': 'blue',
+                        'target-arrow-color': 'blue',
                         'target-arrow-shape': 'triangle',
                         "curve-style": "bezier",
                         label:"data(label)"//,
                         //width:"mapData(weight, 0, 100, 2, 10)"
                     }
                 },
+                {
+                    selector: 'edge[origin = "reactome"]',
+                    style: {
+                        'line-color': 'red',
+                        'target-arrow-color': 'red',
+                        'target-arrow-shape': 'triangle'
+                    }
+                	
+                }
             ],
 
             layout: {
@@ -275,11 +320,13 @@ const App = {
             }
         });
 
+      
         App.cytoscapeContextMenu = cytoscapeContextMenus.create(App.cy);
         App.cytoscapeContextMenus = cytoscapeContextMenus
         geneIdentifierSubject.subscribe((req) => App.getGeneStructure(req.geneId,req.distance));
         geneIdentifierSubject.subscribe((req) => console.log("gene identifier is: "  + JSON.stringify(req)));
-        geneIdentifierSubject.subscribe((req) => App.getPathwayInformation(req.geneId));
+        //geneIdentifierSubject.subscribe((req) => App.getPathwayInformation(req.geneId));
+        
         App.cy.on('cxttapstart','node', function(event) { 
         	App.cytoscapeContextMenus.removeAddedMenuItems();
         	App.expandNodeLabelsMenu(event);
@@ -287,9 +334,13 @@ const App = {
         	});
         App.cy.on('click', 'node', function(event) {
         	graphTable.nodeTable(event);
+        	App.getPathwayInformation(event);
         });
         App.cy.on('click', 'edge', function(event) {
         	graphTable.edgeTable(event);
+        });
+        App.cy.on('add', 'node', function(event){
+        	App.getPathwayInformationForCytoscape(event.target.data());
         });
         
         console.log('App initialized.');

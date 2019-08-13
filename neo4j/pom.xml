@@ -14,8 +14,21 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+ 
   </properties>
 
+    <profiles>
+      <profile>
+        <id>localhost</id>
+		<build>
+			<resources>
+				<resource>
+					<directory>src/main/resources-localhost</directory>
+				</resource>
+			</resources>
+		</build>
+      </profile>
+    </profiles>
 
     <dependencies>
         <dependency>
@@ -55,13 +68,14 @@
 		  </dependency>
 	  </dependencies>
 
+
     <build>
         <plugins>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>assamble-jar-with-dependencies</id>
+                        <id>assemble-jar-with-dependencies</id>
                         <phase>package</phase>
                         <goals>
                             <goal>assembly</goal>

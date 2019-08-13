@@ -183,7 +183,8 @@ const CytoscapeContextMenus = {
 	            			"label" : data.nodeTable[node]["properties"].name,
 	            			"name" : data.nodeTable[node]["properties"].name,
 	            			"id" : data.nodeTable[node]["properties"].id,
-	            			"type": data.nodeTable[node].labels[0]
+	            			"type": data.nodeTable[node].labels[0],
+	            			origin:"neo4j"
 	            			}} );
             		}
             	}
@@ -195,7 +196,8 @@ const CytoscapeContextMenus = {
 	                	id:data.edgeTable[edge].id, 
 	                	source:data.edgeTable[edge].start, 
 	                	target:data.edgeTable[edge].end,
-	                	label: data.edgeTable[edge].type
+	                	label: data.edgeTable[edge].type,
+	                	origin:"neo4j"
 	                	}} );
             	}
             }

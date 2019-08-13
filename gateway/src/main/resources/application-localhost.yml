@@ -1,0 +1,27 @@
+server:
+  port: 8090
+zuul:
+  routes:
+    pathway:
+      path: /api/pathway/**
+      url: http://localhost:8081/
+      stripPrefix: true
+    structure:
+      path: /api/structure/**
+      url: http://localhost:8088/
+      stripPrefix: true
+    neo4j:
+      path: /api/neo4j/**
+      url: http://localhost:8089/
+      stripPrefix: true
+    reference:
+      path: /api/genome/**
+      url: http://localhost:8080/
+      stripPrefix: true
+    reactome:
+      path: /api/reactome/**
+      url: https://reactome.org/
+      stripPrefix: true
+    datasets:
+      path: /api/datasets/**
+      url: http://www.biodalliance.org/

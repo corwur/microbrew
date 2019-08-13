@@ -13,7 +13,6 @@ public class ApplicationConfiguration {
 
         Properties properties = new Properties();
         properties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(resourceName));
-
         ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration();
         applicationConfiguration.setPort(Integer.parseInt(properties.getProperty("server.port")));
         applicationConfiguration.setNeo4jUri(properties.getProperty("neo4j.uri"));

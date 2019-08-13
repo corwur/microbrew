@@ -9,23 +9,24 @@
    <script src="js/vendor.js"></script>
    <script src="app.js"></script>
    <script type="text/javascript" src="https://reactome.org/DiagramJs/diagram/diagram.nocache.js"></script>
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 </head>
 <div class="container">
    <nav class="avbar navbar-expand-lg navbar-light bg-light">
        <a class="navbar-brand" href="#">Microbrewery</a>
        <div class="collapse navbar-collapse">
-           <ul class="nav nav-pills">
+           <ul class="nav nav-pills" id="microTabs">
                <li class="nav-item active">
-                   <a class="nav-link active" data-toggle="tab" href="#structure">Structure</a>
-               </li>
-               <li class="nav-item active">
-                   <a class="nav-link" data-toggle="tab" href="#pathway">Pathway</a>
+                   <a class="nav-link active" data-toggle="pill" href="#structure">Structure</a>
                </li>
                <li class="nav-item">
-                   <a class="nav-link" data-toggle="tab" href="#genome">Genome</a>
+                   <a class="nav-link" data-toggle="pill" href="#pathway">Pathway</a>
                </li>
-               <li class="nav-item active">
-                   <a class="nav-link" data-toggle="tab" href="#circosplot">Circos</a>
+               <li class="nav-item">
+                   <a class="nav-link" data-toggle="pill" href="#genome">Genome</a>
+               </li>
+               <li class="nav-item">
+                   <a class="nav-link" data-toggle="pill" href="#circosplot">Circos</a>
                </li>
            </ul>
            <form class="form-inline my-2 my-lg-0" autocomplete="off" onsubmit="App.selectGene(this, event)">
@@ -59,10 +60,13 @@
    </div>
 </div>
 <script>
+
+
    var App = require('application.js')
    App.init({
        node: document.getElementById('pileup')
    });
+   
    onReactomeDiagramReady = App.createDiagram;
 
 </script>
