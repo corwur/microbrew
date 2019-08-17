@@ -2,6 +2,8 @@
 
 Yeast genome browser, an example genome information application using Reactome and Adam
 
+Add [this database](https://www.dropbox.com/s/aj82hxjgvl4f0x0/yeast.db.dump?dl=0)  to your neo4j instance (neo4j-admin load).
+
 ## Commands to compile / run
 
 ```{bash}
