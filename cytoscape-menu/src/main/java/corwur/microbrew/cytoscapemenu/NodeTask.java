@@ -1,4 +1,4 @@
-package corwur.microbrew.neo4j.tasks;
+package corwur.microbrew.cytoscapemenu;
 
 import nl.corwur.cytoscape.neo4j.internal.neo4j.Neo4jClient;
 

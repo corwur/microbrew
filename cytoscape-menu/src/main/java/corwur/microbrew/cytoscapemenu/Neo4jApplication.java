@@ -1,12 +1,14 @@
-package corwur.microbrew.neo4j;
+package corwur.microbrew.cytoscapemenu;
 
 import java.io.IOException;
 
 
-import corwur.microbrew.neo4j.tasks.ExpandNodeTask;
-import corwur.microbrew.neo4j.tasks.MenuEdgesTask;
-import corwur.microbrew.neo4j.tasks.MenuLabelTask;
-import corwur.microbrew.neo4j.tasks.NodeTask.Direction;
+import corwur.microbrew.cytoscapemenu.ExpandNodeTask;
+import corwur.microbrew.cytoscapemenu.MenuEdgesTask;
+import corwur.microbrew.cytoscapemenu.MenuLabelTask;
+import corwur.microbrew.neo4j.ApplicationConfiguration;
+import corwur.microbrew.neo4j.GsonResponseWriter;
+import corwur.microbrew.neo4j.NodeIdentifier;
 import lychee.Context;
 import lychee.Lychee;
 import lychee.LycheeException;

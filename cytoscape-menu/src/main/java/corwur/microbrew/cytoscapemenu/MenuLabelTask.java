@@ -1,4 +1,4 @@
-package corwur.microbrew.neo4j.tasks;
+package corwur.microbrew.cytoscapemenu;
 
 import java.util.ArrayList;
 import java.util.HashMap;
