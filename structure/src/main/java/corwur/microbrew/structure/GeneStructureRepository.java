@@ -1,9 +1,14 @@
 package corwur.microbrew.structure;
 
-import corwur.microbrew.neo4j.ApplicationConfiguration;
-import corwur.microbrew.neo4j.ApplicationException;
-import corwur.microbrew.neo4j.CypherClient;
-import corwur.microbrew.structure.model.*;
+import corwur.microbrew.structure.model.Backbone;
+import corwur.microbrew.structure.model.Gene;
+import corwur.microbrew.structure.model.GeneIdentifier;
+import corwur.microbrew.structure.model.GeneIndex;
+import corwur.microbrew.structure.model.GeneStructure;
+import corwur.microbrew.structure.model.On;
+import corwur.microbrew.structure.model.Order;
+import corwur.microbrew.structure.model.Organism;
+import corwur.microbrew.structure.model.Sequence;
 import org.neo4j.driver.v1.Value;
 import org.neo4j.driver.v1.types.Node;
 import org.neo4j.driver.v1.types.Relationship;

@@ -1,4 +1,4 @@
-package corwur.microbrew.neo4j;
+package corwur.microbrew.structure;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -13,8 +13,8 @@ public class ApplicationConfiguration {
 
         Properties properties = new Properties();
         properties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(resourceName));
-        var propertyValueParser = new PropertyValueParser(System.getenv());
-        properties.replaceAll((key, value) -> propertyValueParser.parse(value.toString()));
+        PropertyValueParser propertyValueParser = new PropertyValueParser(System.getenv());
+        properties.replaceAll( (key, value) -> propertyValueParser.parse(value.toString()) );
 
         ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration();
         applicationConfiguration.setPort(Integer.parseInt(properties.getProperty("server.port")));

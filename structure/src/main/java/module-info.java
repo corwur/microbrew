@@ -4,6 +4,5 @@ module corwur.microbrew.structure {
     requires neo4j.java.driver;
     requires gson;
     requires lychee;
-	requires corwur.microbrew.neo4j;
     exports corwur.microbrew.structure.model;
 }

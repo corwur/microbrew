@@ -1,10 +1,13 @@
 package corwur.microbrew.structure;
-import corwur.microbrew.neo4j.ApplicationConfiguration;
-import corwur.microbrew.neo4j.ApplicationException;
-import corwur.microbrew.neo4j.GsonResponseWriter;
+
 import corwur.microbrew.structure.model.GeneIdentifier;
 import corwur.microbrew.structure.model.GeneIndex;
-import lychee.*;
+import lychee.Context;
+import lychee.Lychee;
+import lychee.LycheeException;
+import lychee.MediaType;
+import lychee.ResponseWriter;
+import lychee.Server;
 
 import java.io.IOException;
 
