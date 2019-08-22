@@ -68,57 +68,8 @@ const App = {
     	observable.subscribe(App.cytoscapeContextMenus.createExpandNodeEdgesMenu); 
     },
     
-    
-    showPathwayForCytoscape: function(pathway,node) {
-		var cyData = []
-    	for (var index=0; index < pathway.length; index++) { //pathway.length
-			cyData.push({ group:'nodes', data:  {
-			"label" : pathway[index].displayName,
-			"name" : pathway[index].displayName,
-			"id" : pathway[index].stId,
-			"type": "pathway",
-			origin:"reactome"
-			}});
-			cyData.push({ group:'edges', data: { 
-            	id:node.id + "_" + pathway[index].stId, 
-            	source:node.id, 
-            	target:pathway[index].stId,
-            	label: "in pathway",
-            	origin:"reactome"
-            	}} );
-    	}    	
-		App.cy.add(cyData);
-        App.cy.layout({ name: 'cose'}).run();
-    },
-    
-  
-    showPathwaysForCytoscape: function(gene, node) {
-    	for (var index=0; index < gene.results[0].entries.length; index++){
-    		reactome.getPathway(gene.results[0].entries[index].stId).subscribe(
-    	            data => App.showPathwayForCytoscape(data,node));
-    	}
-    },
-    
-    getPathwayInformation: function(event) {
-    	var data = event.target.data(); 
-    	if (data.origin == "reactome"){
-        	App.diagram.loadDiagram(data.id);
-        	App.diagram.onDiagramLoaded(function (loaded) {
-        		console.info("Loaded ", loaded);
-        		//diagram.flagItems("FYN");
-        		if (loaded == name) App.diagram.selectItem(name);
-    	       });
 
-    	}
-    },
-
-    getPathwayInformationForCytoscape: function(node) {
-    	if (node.origin == "neo4j") {
-	        reactome.findGene(node.label).subscribe(
-	            data => App.showPathwaysForCytoscape(data, node));
-    	}
-    },
-    
+   
     
     renderStructureGraph: function(data) {
         const convertToCyData = function(data) {
@@ -287,7 +238,18 @@ const App = {
                     style: {
                         'background-color': 'red',
                         'color' : 'red',
-                        'shape' : 'star'
+                    	'width':5,
+                    	'height':5
+                    }
+                	
+                },
+                {
+                    selector: 'node[schemaClass = "Pathway"]',
+                    style: {
+                        'background-color': 'black',
+                        'color' : 'black',
+                    	'width':8,
+                    	'height':8
                     }
                 	
                 },
@@ -329,18 +291,20 @@ const App = {
         
         App.cy.on('cxttapstart','node', function(event) { 
         	App.cytoscapeContextMenus.removeAddedMenuItems();
-        	App.expandNodeLabelsMenu(event);
-        	App.expandNodeEdgesMenu(event);
+        	if (event.target.data().origin == "neo4j") {
+	        	App.expandNodeLabelsMenu(event);
+	        	App.expandNodeEdgesMenu(event);
+        	}
         	});
         App.cy.on('click', 'node', function(event) {
         	graphTable.nodeTable(event);
-        	App.getPathwayInformation(event);
+        	reactome.getPathwayInformation(event);
         });
         App.cy.on('click', 'edge', function(event) {
         	graphTable.edgeTable(event);
         });
         App.cy.on('add', 'node', function(event){
-        	App.getPathwayInformationForCytoscape(event.target.data());
+        	reactome.getPathwayInformationForCytoscape(event.target.data());
         });
         
         console.log('App initialized.');

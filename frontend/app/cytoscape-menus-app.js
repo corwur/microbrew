@@ -1,6 +1,7 @@
 const rx = require("rxjs");
 const axios = require("axios");
 const rx_operators = require('rxjs/operators');
+var reactome = require('reactome');
 
 const CytoscapeContextMenus = {
 		
@@ -167,8 +168,18 @@ const CytoscapeContextMenus = {
 	},
 	
 	expandNode : function(event) {
-		var observable = CytoscapeContextMenus.expandNodeQuery(event).pipe(rx_operators.share());
-		observable.subscribe(data => CytoscapeContextMenus.expandGraph(event, data));
+		var dataNode = event.target.data();
+		if (dataNode.origin == "neo4j") {
+			var observable = CytoscapeContextMenus.expandNodeQuery(event).pipe(rx_operators.share());
+			observable.subscribe(data => CytoscapeContextMenus.expandGraph(event, data));
+		}
+		else if (dataNode.origin == "reactome"){
+			var observable = reactome.query(event.target.id()).pipe(rx_operators.share());
+			var node = Object();
+			node.id = event.target.id();
+			node.dbId = event.target.id().split("_")[1];
+			observable.subscribe(data => reactome.mapReactomeForCytoscape(data, node));
+		}
 	},
 
 	
