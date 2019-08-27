@@ -29,6 +29,7 @@ public class GeneStructureRepository {
     private static final String GET_GENE_ON = "MATCH (g:gene)-[r:on]-(s:sequence) WHERE g.name=$geneId RETURN g,r,s";
     private static final String GET_ALL_GENES_WITHIN_DISTANCE = "MATCH (n:gene)-[r:backbone*..%d]-(g:gene) WHERE n.name=$geneId RETURN DISTINCT g";
     private static final String GET_ORGANISMS = "MATCH (g:gene)-[r:order]->(t:gene) WHERE g.name IN $genes WITH r.in AS r_in MATCH (o:organism) WHERE o.name=r_in RETURN DISTINCT o";
+    private static final String GET_ALL_ORGANISMS = "MATCH (o:organism) RETURN DISTINCT o";
     private static final String GET_ALL_SEQUENCES = "MATCH (g:gene)-[r:on]->(s:sequence) WHERE g.name IN $genes RETURN g, r, s ORDER BY s.organisme, s.name";
     private static final String GET_ORDER_LINKS = "MATCH (g:gene)-[r:order]->(t:gene) WHERE g.name IN $genes and t.name in $genes RETURN g,r,t";
     private static final String GET_BACKBONE_LINKS = "MATCH (g:gene)-[r:backbone]->(t:gene) WHERE g.name IN $genes and t.name in $genes RETURN g,r,t";
@@ -58,7 +59,8 @@ public class GeneStructureRepository {
             var root = getGeneById(geneIdentifier, cypherClient).orElseThrow(ApplicationException::new);
             var genes = getGenes(geneIdentifier, distance, cypherClient);
             genes.put(root.name, root);
-            var organisms = getOrganisms(genes, cypherClient);
+            //var organisms = getOrganisms(genes, cypherClient);
+            var organisms = getAllOrganisms(cypherClient);
             var sequences = getSequences(genes, cypherClient);
             var order = getOrderLinks(genes, cypherClient);
             var backbone = getBackboneLinks(genes, cypherClient);
@@ -126,6 +128,13 @@ public class GeneStructureRepository {
         return result.stream().map(this::createOrganism).collect(Collectors.toMap(Organism::getName, Function.identity()));
     }
 
+    private Map<String, Organism> getAllOrganisms(CypherClient cypherClient) throws IOException {
+        Map<String, Object> parameters = new HashMap<>();
+        var result = cypherClient.runQuery(GET_ALL_ORGANISMS, parameters);
+        return result.stream().map(this::createOrganism).collect(Collectors.toMap(Organism::getName, Function.identity()));
+    }
+
+    
     private Map<String, Sequence> getSequences(Map<String, Gene> genes, CypherClient cypherClient) throws IOException {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("genes", genes.keySet());

@@ -60,7 +60,6 @@ const Reactome = {
     getPathwayInformation: function(event) {
     	var data = event.target.data(); 
     	if (data.origin == "reactome"){
-    		console.log(diagram);
         	App.diagram.loadDiagram(data.stdId);
         	App.diagram.onDiagramLoaded(function (loaded) {
         		console.info("Loaded ", loaded);

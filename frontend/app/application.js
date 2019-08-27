@@ -55,7 +55,7 @@ const App = {
         var observable = App.geneStructure.getStructure(geneIdentifier, distance).pipe(rx_operators.share());
 
         observable.subscribe(App.renderStructureGraph);
-        observable.subscribe(App.renderCircleDiagram)
+        //observable.subscribe(App.renderCircleDiagram);
 
     },
 
@@ -69,9 +69,21 @@ const App = {
     },
     
 
-   
+    createCircosSelect: function() {
+    	App.organisms = new Set();
+        for(var index = 0; index < App.structureData.sequences.length; index ++) {
+        	App.organisms.add(App.structureData.sequences[index].organism)
+        }
+        var select = $('#circos_organism');
+        select.empty();
+        App.organisms.forEach(function(o){
+        	select.append($('<option>', {value:o, text: o, selected:true}))
+        });
+    },
     
     renderStructureGraph: function(data) {
+    	App.structureData = data;
+    	App.createCircosSelect();
         const convertToCyData = function(data) {
             var cyData = []
             for(var index =0; index < data.genes.length ; index++) {
@@ -108,17 +120,20 @@ const App = {
         App.cy.layout({ name: 'cose'}).run();
     },
 
-    renderCircleDiagram: function(structureData) {
+    renderCircleDiagram: function() {
+    	var seqlength = parseInt($('#circos_seqlength')[0][$('#circos_seqlength')[0].selectedIndex].value);
+    	var structureData  = App.structureData;
+    	if (structureData == null) return;
     	document.getElementById('circos').innerHTML = "";
     	App.circos =  new circos({
             container: document.getElementById('circos'),
-            width: 800,
+            width: 600,
             height: 600,
         });
     	
         var configuration = {
             innerRadius: 250,
-            outerRadius: 300,
+            outerRadius: 260,
             cornerRadius: 10,
             gap: 0.01, // in radian
             labels: {
@@ -152,11 +167,19 @@ const App = {
         //organisms
         var data = [];
         var contigs = new Set();
+
+    	var selectedOrganisms = new Set();
+        var select = $('#circos_organism');
+        for (var o=0; o < select[0].selectedOptions.length; o++) {
+        	selectedOrganisms.add(select[0].selectedOptions[o].value);
+        }
         
         for(var index = 0; index < structureData.sequences.length; index ++) {
         	var name = structureData.sequences[index].name + "(" + structureData.sequences[index].organism + ")"
+
         	//console.log(structureData.sequences[index].length);
-        	if (structureData.sequences[index].length > 100000) {
+        	
+        	if (structureData.sequences[index].length >= seqlength && selectedOrganisms.has(structureData.sequences[index].organism) ) {
 	            data.push( { len: structureData.sequences[index].length, 
 	            			color: "#8dd3c7", 
 	            			label: name, 
@@ -164,13 +187,29 @@ const App = {
 	        	contigs.add(structureData.sequences[index].id);
 	        }
         }
-        //console.log(contigs);	
+        
+      //console.log(contigs);	
         App.circos.layout(data, configuration);
         var colors = new Colors(); 
+    	var pathways = [];
+    	var genes = [];
         for (var index =0; index < structureData.genes.length; index++){
-            data = [];
-            
+            var data = [];
+        	// get nodes from cytoscape
+        	var pathwayNodes = App.cy.nodes("#"+structureData.genes[index].id).connectedEdges("[origin ='reactome']").connectedNodes();
         	for (var source=0; source < structureData.genes[index].on.length; source++){
+        		if (contigs.has(structureData.genes[index].on[source].sequenceID)) {
+        			genes.push({block_id: "" + structureData.genes[index].on[source].sequenceID, 
+	        					start:structureData.genes[index].on[source].start,
+	        					end:structureData.genes[index].on[source].end})
+        			for (var p=0; p < pathwayNodes.length; p++) {
+        				if (pathwayNodes[p].data().origin == "reactome"){
+	        				pathways.push({block_id: "" + structureData.genes[index].on[source].sequenceID, 
+	        					start:structureData.genes[index].on[source].start,
+	        					end:structureData.genes[index].on[source].end});
+        				}
+        			}
+        		}
             	for (var target=source+1; target < structureData.genes[index].on.length; target++){
             		if (contigs.has(structureData.genes[index].on[source].sequenceID) && contigs.has(structureData.genes[index].on[target].sequenceID) ) { 
             			data.push({
@@ -187,12 +226,29 @@ const App = {
             		
             						
             	}
+            	
+           
         	}
-            App.circos.chords("links_"+structureData.genes[index].name.replace(/[\|\.]/g,"_"), data, {color:colors.pick(),
+        	
+            App.circos.chords("links_"+structureData.genes[index].name.replace(/[\|\.]/g,"_"), data, {
+            	radius: 0.89,
+            	color:colors.pick(),
                 tooltipContent: function (datum, index) {
                     return "";
                   }});
         }
+    	App.circos.stack('pathways', pathways, {
+    		color:'red',
+    		innerRadius:1.01,
+    		outerRadius:1.2});
+    	App.circos.stack('genes', genes, {
+    		color:'blue',
+    		innerRadius:0.9,
+    		outerRadius:0.99});
+
+        
+   
+        
         App.circos.render();
     },
 
@@ -200,7 +256,7 @@ const App = {
     	App.diagram = Reactome.Diagram.create({
             "placeHolder" : "reactome",
             "width" : 900,
-            "height" : 500
+            "height" : 900
     	});
     	App.diagram.onObjectSelected(function(obj) {console.log(obj)});
     },
@@ -208,7 +264,8 @@ const App = {
     init(config) {
     
         App.geneStructure = geneStructure;
-
+        App.structureData = null;
+        App.organisms = new Set();
         App.cy = cytoscape({
             container: document.getElementById('cy'),
             elements: [
@@ -305,7 +362,13 @@ const App = {
         });
         App.cy.on('add', 'node', function(event){
         	reactome.getPathwayInformationForCytoscape(event.target.data());
+            // Add select options
+            
+      
         });
+        
+        
+        
         
         console.log('App initialized.');
 
