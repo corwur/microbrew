@@ -16,16 +16,16 @@
        <a class="navbar-brand" href="#">Microbrewery</a>
        <div class="collapse navbar-collapse">
            <ul class="nav nav-pills" id="microtabs">
-               <li class="nav-item active">
+               <li class="nav-item active" id="structure_nav">
                    <a class="nav-link active" data-toggle="pill" href="#structure">Structure</a>
                </li>
-               <li class="nav-item">
+               <li class="nav-item" id="pathway_nav">
                    <a class="nav-link" data-toggle="pill" href="#pathway" >Pathway</a>
                </li>
-               <li class="nav-item">
+               <li class="nav-item" id="genome_nav">
                    <a class="nav-link" data-toggle="pill" href="#genome" >Genome</a>
                </li>
-               <li class="nav-item">
+               <li class="nav-item" id="circosplot_nav">
                    <a class="nav-link" data-toggle="pill" href="#circosplot" >Circos</a>
                </li>
            </ul>
@@ -90,6 +90,12 @@
 
 	$('#microtabs a[href="#circosplot"]').on('click', function(event){
 		App.renderCircleDiagram();
+		return true;
+	   });
+
+	
+	$('#microtabs a[href="#pathway"]').on('click', function(event){
+		App.loadDiagram();
 		return true;
 	   });
 

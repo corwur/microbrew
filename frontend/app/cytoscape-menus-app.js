@@ -116,7 +116,7 @@ const CytoscapeContextMenus = {
 		var target = event.target || event.cyTarget;
 
 		return new rx.Observable( ( observer ) => {
-            axios.get( '/api/neo4j/node/menu/' + type + '/' + target.id())
+            axios.get( '/api/neo4j/node/menu/' + type,  {params: {'id': target.id()}})
                 .then( ( response ) => {
                     observer.next( response.data );
                     observer.complete();
@@ -139,7 +139,7 @@ const CytoscapeContextMenus = {
 		}
 			
 		return new rx.Observable( ( observer ) => {
-			axios.get( '/api/neo4j/node/expand/' + type + '/' + target.id(), {params: {'label': callee.target, 'direction': direction}} )
+			axios.get( '/api/neo4j/node/expand/' + type, {params: {'id': target.id(), 'label': callee.target, 'direction': direction}} )
 			.then( ( response ) => {
 				observer.next( response.data );
 				observer.complete();
@@ -156,7 +156,7 @@ const CytoscapeContextMenus = {
 		var target = event.target || event.cyTarget;
 
 		return new rx.Observable( ( observer ) => {
-            axios.get( '/api/neo4j/node/expand/' + target.id())
+            axios.get( '/api/neo4j/node/expand', {params: {'id': target.id()}})
                 .then( ( response ) => {
                     observer.next( response.data );
                     observer.complete();

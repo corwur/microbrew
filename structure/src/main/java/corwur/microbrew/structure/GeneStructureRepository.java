@@ -14,6 +14,7 @@ import org.neo4j.driver.v1.types.Node;
 import org.neo4j.driver.v1.types.Relationship;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,8 +60,8 @@ public class GeneStructureRepository {
             var root = getGeneById(geneIdentifier, cypherClient).orElseThrow(ApplicationException::new);
             var genes = getGenes(geneIdentifier, distance, cypherClient);
             genes.put(root.name, root);
-            //var organisms = getOrganisms(genes, cypherClient);
-            var organisms = getAllOrganisms(cypherClient);
+            var organisms = getOrganisms(genes, cypherClient);
+            //var organisms = getAllOrganisms(cypherClient);
             var sequences = getSequences(genes, cypherClient);
             var order = getOrderLinks(genes, cypherClient);
             var backbone = getBackboneLinks(genes, cypherClient);
@@ -82,6 +83,32 @@ public class GeneStructureRepository {
         }
     }
 
+	public GeneStructure getGenesToOrganisms(GeneIdentifier geneIdentifier) throws ApplicationException {
+        try (CypherClient cypherClient = new CypherClient(uri, user, password)) {
+            var root = getGeneById(geneIdentifier, cypherClient).orElseThrow(ApplicationException::new);
+            Map<String, Gene> genes = new HashMap<>();
+            genes.put(root.name, root);
+            var organisms = getOrganisms(genes, cypherClient);
+            var sequences = getSequences(genes, cypherClient);
+
+            for (Gene gene : genes.values()) {
+                var on = getOnLinks(gene.name, cypherClient);
+                gene.on.addAll(on);
+            }
+
+            return new GeneStructure(
+                    genes.values(),
+                    organisms.values(),
+                    sequences.values(),
+                    null,
+                    null
+            );
+        } catch (IOException e) {
+            throw new ApplicationException();
+        }
+    }
+
+    
     private List<String> getAllGenes(String search, int limit, long offset, CypherClient cypherClient) throws IOException {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("limit", limit);
@@ -224,4 +251,5 @@ public class GeneStructureRepository {
             return Optional.empty();
         }
     }
+
 }

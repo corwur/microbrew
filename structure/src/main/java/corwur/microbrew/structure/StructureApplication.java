@@ -19,8 +19,8 @@ public class StructureApplication {
         Context context = server.addContext("/gene", (ResponseWriter) new GsonResponseWriter(), MediaType.APPLICATION_JSON);
         GeneStructureRepository geneStructureRepository = new GeneStructureRepository(applicationConfiguration);
 
-        context.get(Lychee.regex("/gene/(?<geneId>\\w*)$"), ((request, response) -> {
-            var geneIdentfier = request.get("geneId").map(GeneIdentifier::new).orElseThrow(IllegalArgumentException::new);
+        context.get(Lychee.regex("/gene$"), ((request, response) -> {
+            var geneIdentfier = request.get("id").map(GeneIdentifier::new).orElseThrow(IllegalArgumentException::new);
             var distance = request.get("distance").map(Integer::parseInt).orElse(1);
             try {
                 var genes = geneStructureRepository.getAllGenesWithinDistance(geneIdentfier, distance);
@@ -30,10 +30,20 @@ public class StructureApplication {
             }
         }));
 
-        context.get(Lychee.regex("/gene$"), ((request, response) -> {
+        context.get(Lychee.regex("/gene/organisms$"), ((request, response) -> {
+            var geneIdentfier = request.get("id").map(GeneIdentifier::new).orElseThrow(IllegalArgumentException::new);
+            try {
+                var genes = geneStructureRepository.getGenesToOrganisms(geneIdentfier);
+                response.ok(genes);
+            } catch (ApplicationException e) {
+                throw new IllegalStateException(e);
+            }
+        }));
+
+        context.get(Lychee.regex("/gene/search$"), ((request, response) -> {
             int limit = request.get("limit").map(Integer::parseInt).orElse(25);
             long offset = request.get("offset").map(Long::parseLong).orElse(0l);
-            String search = request.get("search").orElse(".*");
+            String search = request.get("query").orElse(".*");
             GeneIndex geneIndex = null;
             try {
                 geneIndex = geneStructureRepository.getGeneIndex(search, limit, offset);

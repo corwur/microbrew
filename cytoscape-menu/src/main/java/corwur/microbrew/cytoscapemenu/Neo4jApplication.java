@@ -29,8 +29,8 @@ public class Neo4jApplication {
         Neo4jClient neo4jClient = new Neo4jClient();
         neo4jClient.connect(new ConnectionParameter(applicationConfiguration.getNeo4jUri(), applicationConfiguration.getNeo4jUser(), applicationConfiguration.getNeo4jPassword().toCharArray()));
         
-        context.get(Lychee.regex("/node/expand/(?<nodeId>\\w*)$"), ((request, response) -> {
-        	var nodeIdentifier = request.get("nodeId").map(NodeIdentifier::new).orElseThrow(IllegalArgumentException::new);
+        context.get(Lychee.regex("/node/expand$"), ((request, response) -> {
+        	var nodeIdentifier = request.get("id").map(NodeIdentifier::new).orElseThrow(IllegalArgumentException::new);
         	ExpandNodeTask expandNodeTask = new ExpandNodeTask(neo4jClient, nodeIdentifier.getId());
             try {
 				response.ok(expandNodeTask.expand());
@@ -38,8 +38,8 @@ public class Neo4jApplication {
 				response.internalServerError("Error executing expand node task");
 			}
         }));
-        context.get(Lychee.regex("/node/menu/labels/(?<nodeId>\\w*)$"), ((request, response) -> {
-        	var nodeIdentifier = request.get("nodeId").map(NodeIdentifier::new).orElseThrow(IllegalArgumentException::new);
+        context.get(Lychee.regex("/node/menu/labels$"), ((request, response) -> {
+        	var nodeIdentifier = request.get("id").map(NodeIdentifier::new).orElseThrow(IllegalArgumentException::new);
         	MenuLabelTask menuLabelTask = new MenuLabelTask(neo4jClient, nodeIdentifier.getId());
             try {
             	menuLabelTask.createMenuItem();
@@ -48,8 +48,8 @@ public class Neo4jApplication {
 				response.internalServerError("Error executing expand menu label task");
 			}
         }));
-        context.get(Lychee.regex("/node/menu/edges/(?<nodeId>\\w*)$"), ((request, response) -> {
-        	var nodeIdentifier = request.get("nodeId").map(NodeIdentifier::new).orElseThrow(IllegalArgumentException::new);
+        context.get(Lychee.regex("/node/menu/edges$"), ((request, response) -> {
+        	var nodeIdentifier = request.get("id").map(NodeIdentifier::new).orElseThrow(IllegalArgumentException::new);
         	MenuEdgesTask menuEdgesTask = new MenuEdgesTask(neo4jClient, nodeIdentifier.getId());
             try {
             	menuEdgesTask.createMenuItem();
@@ -59,8 +59,8 @@ public class Neo4jApplication {
 			}
         }));
 
-        context.get(Lychee.regex("/node/expand/node/(?<nodeId>\\w*)$"), ((request, response) -> {
-        	var nodeIdentifier = request.get("nodeId").map(NodeIdentifier::new).orElseThrow(IllegalArgumentException::new);
+        context.get(Lychee.regex("/node/expand/node$"), ((request, response) -> {
+        	var nodeIdentifier = request.get("id").map(NodeIdentifier::new).orElseThrow(IllegalArgumentException::new);
         	var label = request.get("label").map(String::new).orElseThrow(IllegalArgumentException::new);
         	var direction = request.get("direction").map(String::new).orElseThrow(IllegalArgumentException::new);
         	ExpandNodeTask expandNodeTask = new ExpandNodeTask(neo4jClient, nodeIdentifier.getId());
@@ -74,8 +74,8 @@ public class Neo4jApplication {
 			}
         }));
 
-        context.get(Lychee.regex("/node/expand/edge/(?<nodeId>\\w*)$"), ((request, response) -> {
-        	var nodeIdentifier = request.get("nodeId").map(NodeIdentifier::new).orElseThrow(IllegalArgumentException::new);
+        context.get(Lychee.regex("/node/expand/edge$"), ((request, response) -> {
+        	var nodeIdentifier = request.get("id").map(NodeIdentifier::new).orElseThrow(IllegalArgumentException::new);
         	var label = request.get("label").map(String::new).orElseThrow(IllegalArgumentException::new);
         	var direction = request.get("direction").map(String::new).orElseThrow(IllegalArgumentException::new);
         	ExpandNodeTask expandNodeTask = new ExpandNodeTask(neo4jClient, nodeIdentifier.getId());

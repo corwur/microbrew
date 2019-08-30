@@ -26,7 +26,7 @@ const App = {
     selectGene: function(elem, event) {
         event.returnValue = false;
         var geneId = elem.elements[0].value
-        var distance = elem.elements[1].value ? elem.elements[1].value : 1
+        var distance = elem.elements[1].value ? elem.elements[1].value : 1;
         geneIdentifierSubject.next({ geneId:geneId, distance:distance})
         return false
     },
@@ -59,6 +59,61 @@ const App = {
 
     },
 
+     
+    addStructure: function(data){
+    	var genes = [];
+    	for (var j=0; j < data.genes.length; j++) {
+	    	var found = 0
+	    	
+	    	while (found < App.structureData.genes.length && App.structureData.genes[found].id != data.genes[j].id) {
+		    	found += 1;
+	    	}
+	    	if (found == App.structureData.genes.length) {
+	    		genes.push(data.genes[j]);
+	    	}
+    	}
+    	App.structureData.genes = App.structureData.genes.concat(genes);
+    	
+    	var organisms = [];
+    	for (var j=0; j < data.organisms.length; j++) {
+	    	var found = 0
+	    	
+	    	while (found < App.structureData.organisms.length && App.structureData.organisms[found].id != data.organisms[j].id) {
+		    	found += 1;
+	    	}
+	    	if (found == App.structureData.organisms.length) {
+	    		organisms.push(data.organisms[j]);
+	    	}
+    	}
+    	App.structureData.organisms = App.structureData.organisms.concat(organisms);
+    	
+
+    	var sequences = [];
+    	for (var j=0; j < data.sequences.length; j++) {
+	    	var found = 0
+	    	
+	    	while (found < App.structureData.sequences.length && App.structureData.sequences[found].id != data.sequences[j].id) {
+		    	found += 1;
+	    	}
+	    	if (found == App.structureData.sequences.length) {
+	    		sequences.push(data.sequences[j]);
+	    	}
+    	}
+    	App.structureData.sequences = App.structureData.sequences.concat(sequences);
+
+    	App.renderCircleDiagram();
+    },
+    
+    getGeneToOrganisms: function(nodeData) {
+    	if (nodeData.origin == "neo4j" && nodeData.type == "gene") {
+    		var observable = App.geneStructure.getGeneToOrganisms(nodeData.name).pipe(rx_operators.share());
+	        
+	        //observable.subscribe(App.renderCircleDiagram);
+	        observable.subscribe(App.addStructure);
+    	}
+    },
+
+    
     expandNodeLabelsMenu : function(event) {
     	var observable = App.cytoscapeContextMenus.getExpandNodeLabelsMenu(event).pipe(rx_operators.share());
     	observable.subscribe(App.cytoscapeContextMenus.createExpandNodeLabelsMenu); 
@@ -75,9 +130,18 @@ const App = {
         	App.organisms.add(App.structureData.sequences[index].organism)
         }
         var select = $('#circos_organism');
+        var selectedOrganisms = new Set()
+        for (var o=0; o < select[0].selectedOptions.length; o++) {
+        	selectedOrganisms.add(select[0].selectedOptions[o].value);
+
+        }
         select.empty();
         App.organisms.forEach(function(o){
-        	select.append($('<option>', {value:o, text: o, selected:true}))
+        	var selected = true;
+        	if (selectedOrganisms.size > 0) {
+        		selected = selectedOrganisms.has(o);
+        	}
+        	select.append($('<option>', {value:o, text: o, selected:selected}))
         });
     },
     
@@ -141,7 +205,7 @@ const App = {
                 position: 'center',
                 size: '14px',
                 color: '#000000',
-                radialOffset: 20,
+                radialOffset: 20
             },
             ticks: {
                 display: false,
@@ -167,7 +231,8 @@ const App = {
         //organisms
         var data = [];
         var contigs = new Set();
-
+        var colors = {};
+        var colors = new Colors();
     	var selectedOrganisms = new Set();
         var select = $('#circos_organism');
         for (var o=0; o < select[0].selectedOptions.length; o++) {
@@ -175,18 +240,30 @@ const App = {
         }
         
         for(var index = 0; index < structureData.sequences.length; index ++) {
-        	var name = structureData.sequences[index].name + "(" + structureData.sequences[index].organism + ")"
+        	var name = structureData.sequences[index].name;
 
         	//console.log(structureData.sequences[index].length);
         	
         	if (structureData.sequences[index].length >= seqlength && selectedOrganisms.has(structureData.sequences[index].organism) ) {
+	        	if (!colors[structureData.sequences[index].organism]){
+	        		colors[structureData.sequences[index].organism] = colors.pick();
+	        	}
 	            data.push( { len: structureData.sequences[index].length, 
-	            			color: "#8dd3c7", 
+	            			color: colors[structureData.sequences[index].organism], 
 	            			label: name, 
-	            			id: ""+structureData.sequences[index].id} );
+	            			id: ""+structureData.sequences[index].id,
+	            			organims : structureData.sequences[index].organism} );
 	        	contigs.add(structureData.sequences[index].id);
 	        }
         }
+        data.sort(function(x,y) {
+        	if (x.organism == y.organism) {
+        		return x.label < y.label;
+        	}
+        	else {
+        		return x.organism < y.organism;
+        	}
+        })
         
       //console.log(contigs);	
         App.circos.layout(data, configuration);
@@ -201,12 +278,14 @@ const App = {
         		if (contigs.has(structureData.genes[index].on[source].sequenceID)) {
         			genes.push({block_id: "" + structureData.genes[index].on[source].sequenceID, 
 	        					start:structureData.genes[index].on[source].start,
-	        					end:structureData.genes[index].on[source].end})
+	        					end:structureData.genes[index].on[source].end,
+	        					label: structureData.genes[index].name})
         			for (var p=0; p < pathwayNodes.length; p++) {
         				if (pathwayNodes[p].data().origin == "reactome"){
 	        				pathways.push({block_id: "" + structureData.genes[index].on[source].sequenceID, 
 	        					start:structureData.genes[index].on[source].start,
-	        					end:structureData.genes[index].on[source].end});
+	        					end:structureData.genes[index].on[source].end,
+	        					label: pathwayNodes[p].data().name});
         				}
         			}
         		}
@@ -240,11 +319,15 @@ const App = {
     	App.circos.stack('pathways', pathways, {
     		color:'red',
     		innerRadius:1.01,
-    		outerRadius:1.2});
+    		outerRadius:1.2,
+    		tooltipContent: function (datum, index) {
+                return datum.label;}});
     	App.circos.stack('genes', genes, {
     		color:'blue',
     		innerRadius:0.9,
-    		outerRadius:0.99});
+    		outerRadius:0.99,
+    		tooltipContent: function (datum, index) {
+                return datum.label;}});
 
         
    
@@ -255,16 +338,31 @@ const App = {
     createDiagram: function(){
     	App.diagram = Reactome.Diagram.create({
             "placeHolder" : "reactome",
-            "width" : 900,
-            "height" : 900
+            "width" : 1000,
+            "height" : 800
     	});
     	App.diagram.onObjectSelected(function(obj) {console.log(obj)});
     },
+    
+    loadDiagram: function() {
+    	reactome.getPathwayJS(App.selectedPathway);
+    },
 
+    setPathwayInformation : function(event) {
+    	var data = event.target.data();
+    	if (data.origin="reactome"){
+    		App.selectedPathway = data.stId;
+    	}
+    	else {
+    		App.selectedPathway = null;
+    	}
+    },
+    
     init(config) {
     
         App.geneStructure = geneStructure;
         App.structureData = null;
+        App.selectedPathway = null;
         App.organisms = new Set();
         App.cy = cytoscape({
             container: document.getElementById('cy'),
@@ -355,15 +453,17 @@ const App = {
         	});
         App.cy.on('click', 'node', function(event) {
         	graphTable.nodeTable(event);
-        	reactome.getPathwayInformation(event);
+        	App.setPathwayInformation(event);
         });
         App.cy.on('click', 'edge', function(event) {
         	graphTable.edgeTable(event);
         });
         App.cy.on('add', 'node', function(event){
         	reactome.getPathwayInformationForCytoscape(event.target.data());
-            // Add select options
-            
+        	App.getGeneToOrganisms(event.target.data());
+        	App.createCircosSelect();
+        	App.renderCircleDiagram();
+        	
       
         });
         

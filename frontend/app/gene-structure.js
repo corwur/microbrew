@@ -5,7 +5,7 @@ const GeneStructure = {
 
     findGene(geneIdentifier) {
         return new rx.Observable( ( observer ) => {
-            axios.get( '/api/structure/gene' + '?search=' + geneIdentifier)
+            axios.get( '/api/structure/gene/search', {params : {'query' : geneIdentifier}})
                 .then( ( response ) => {
                     observer.next( response.data );
                     observer.complete();
@@ -18,7 +18,20 @@ const GeneStructure = {
 
     getStructure(geneIdentifier, distance) {
         return new rx.Observable( ( observer ) => {
-            axios.get( '/api/structure/gene/' + geneIdentifier + '?distance=' + distance )
+            axios.get( '/api/structure/gene', {params : {'id' : geneIdentifier, 'distance':distance}})
+                .then( ( response ) => {
+                    observer.next( response.data );
+                    observer.complete();
+                } )
+                .catch( ( error ) => {
+                    observer.error( error );
+                } );
+        });
+    },
+
+    getGeneToOrganisms(geneIdentifier) {
+        return new rx.Observable( ( observer ) => {
+            axios.get( '/api/structure/gene/organisms', {params:{'id' : geneIdentifier}})
                 .then( ( response ) => {
                     observer.next( response.data );
                     observer.complete();
@@ -28,6 +41,7 @@ const GeneStructure = {
                 } );
         });
     }
+
 }
 
 module.exports = GeneStructure;

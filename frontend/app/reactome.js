@@ -57,16 +57,13 @@ const Reactome = {
     	}
     },
     
-    getPathwayInformation: function(event) {
-    	var data = event.target.data(); 
-    	if (data.origin == "reactome"){
-        	App.diagram.loadDiagram(data.stdId);
-        	App.diagram.onDiagramLoaded(function (loaded) {
-        		console.info("Loaded ", loaded);
-        		//diagram.flagItems("FYN");
-        		if (loaded == name) App.diagram.selectItem(name);
-    	       });
-
+    getPathwayJS: function(id) {
+    	if (id != null) {
+	    	App.diagram.loadDiagram(id);
+	        App.diagram.onDiagramLoaded(function (loaded) {
+	        	//diagram.flagItems("FYN");
+	        	if (loaded == name) App.diagram.selectItem(name);
+	        });
     	}
     },
 
