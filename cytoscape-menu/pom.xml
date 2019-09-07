@@ -6,73 +6,23 @@
         <groupId>corwur.microbrew</groupId>
         <version>1.0-SNAPSHOT</version>
   </parent>
-  <artifactId>cytoscapemenu</artifactId>
+  <artifactId>cytoscape-menu</artifactId>
   <packaging>jar</packaging>
 
-  <name>cytoscapemenu</name>
-  <url>http://maven.apache.org</url>
-
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
- 
-  </properties>
-
-    <profiles>
-      <profile>
-        <id>localhost</id>
-		<build>
-			<resources>
-				<resource>
-					<directory>src/main/resources-localhost</directory>
-				</resource>
-			</resources>
-		</build>
-      </profile>
-    </profiles>
+  <name>cytoscape-menu</name>
 
     <dependencies>
         <dependency>
-            <groupId>org.neo4j.driver</groupId>
-            <artifactId>neo4j-java-driver</artifactId>
-            <version>1.4.4</version>
-        </dependency>
-        <dependency>
             <groupId>corwur.microbrew</groupId>
-            <artifactId>lychee</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>corwur.microbrew</groupId>
-            <artifactId>neo4j</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <artifactId>lychee-neo4j</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
 		    <groupId>nl.corwur</groupId>
 		    <artifactId>cytoscape-neo4j-plugin</artifactId>
 		    <version>0.3</version>
         </dependency>
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.8.5</version>
-        </dependency>
-		  <dependency>
-		    <groupId>org.apache.logging.log4j</groupId>
-		    <artifactId>log4j-api</artifactId>
-		    <version>2.12.0</version>
-		  </dependency>
-		  <dependency>
-		    <groupId>org.apache.logging.log4j</groupId>
-		    <artifactId>log4j-core</artifactId>
-		    <version>2.12.0</version>
-		  </dependency>
-		    <dependency>
-		    <groupId>org.apache.logging.log4j</groupId>
-		    <artifactId>log4j-web</artifactId>
-		    <version>2.12.0</version>
-		  </dependency>
 	  </dependencies>
-
 
     <build>
         <plugins>
@@ -88,7 +38,7 @@
                         <configuration>
                             <archive>
                                 <manifest>
-                                    <mainClass>corwur.microbrew.cytoscapemenu.Neo4jApplication</mainClass>
+                                    <mainClass>corwur.microbrew.cytoscapemenu.CytoscapeMenuApplication</mainClass>
                                 </manifest>
                             </archive>
                             <descriptorRefs>

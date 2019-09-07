@@ -1,11 +1,11 @@
 module corwur.microbrew.cytoscapemenu {
     requires jdk.httpserver;
     requires java.sql;
-    requires transitive neo4j.java.driver;
+    requires neo4j.java.driver;
     requires gson;
     requires lychee;
-    requires transitive cytoscape.neo4j.plugin;
-	requires log4j;
-	requires corwur.microbrew.neo4j;
+    requires log4j;
+	requires corwur.microbrew.lychee.neo4j;
+    requires cytoscape.neo4j.plugin;
     exports corwur.microbrew.cytoscapemenu;
 }

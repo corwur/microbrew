@@ -1,40 +1,45 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>microbrew</artifactId>
         <groupId>corwur.microbrew</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
+    <artifactId>lychee-neo4j</artifactId>
+    <packaging>jar</packaging>
 
-    <artifactId>structure</artifactId>
-
-    <profiles>
-      <profile>
-        <id>localhost</id>
-		<build>
-			<resources>
-				<resource>
-					<directory>src/main/resources-localhost</directory>
-				</resource>
-			</resources>
-		</build>
-      </profile>
-    </profiles>
-
+    <name>lychee-neo4j</name>
 
     <dependencies>
         <dependency>
             <groupId>corwur.microbrew</groupId>
-            <artifactId>lychee-neo4j</artifactId>
+            <artifactId>lychee</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.neo4j.driver</groupId>
+            <artifactId>neo4j-java-driver</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-web</artifactId>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -44,7 +49,7 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>assamble-jar-with-dependencies</id>
+                        <id>assemble-jar-with-dependencies</id>
                         <phase>package</phase>
                         <goals>
                             <goal>assembly</goal>
@@ -52,7 +57,7 @@
                         <configuration>
                             <archive>
                                 <manifest>
-                                    <mainClass>corwur.microbrew.structure.StructureApplication</mainClass>
+                                    <mainClass>corwur.microbrew.neo4j.Neo4jApplication</mainClass>
                                 </manifest>
                             </archive>
                             <descriptorRefs>
@@ -64,5 +69,5 @@
             </plugin>
         </plugins>
     </build>
-    
+
 </project>

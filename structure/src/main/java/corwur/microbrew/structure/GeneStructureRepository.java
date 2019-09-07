@@ -1,5 +1,8 @@
 package corwur.microbrew.structure;
 
+import lychee.ApplicationConfiguration;
+import lychee.ApplicationException;
+import corwur.microbrew.lychee.neo4j.CypherClient;
 import corwur.microbrew.structure.model.Backbone;
 import corwur.microbrew.structure.model.Gene;
 import corwur.microbrew.structure.model.GeneIdentifier;
@@ -14,7 +17,6 @@ import org.neo4j.driver.v1.types.Node;
 import org.neo4j.driver.v1.types.Relationship;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

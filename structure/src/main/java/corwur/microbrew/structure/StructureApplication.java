@@ -1,5 +1,8 @@
 package corwur.microbrew.structure;
 
+import lychee.ApplicationConfiguration;
+import lychee.ApplicationException;
+import corwur.microbrew.lychee.neo4j.GsonResponseWriter;
 import corwur.microbrew.structure.model.GeneIdentifier;
 import corwur.microbrew.structure.model.GeneIndex;
 import lychee.Context;

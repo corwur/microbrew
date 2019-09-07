@@ -9,8 +9,7 @@ const CytoscapeContextMenus = {
 		var target = event.target || event.cyTarget;
 		target.remove();
 	},
-	
-	
+
 	removeAddedMenuItems : function() {
 		for (var menuItem in CytoscapeContextMenus.addedMenuItems) {
 			App.cytoscapeContextMenu.removeMenuItem(CytoscapeContextMenus.addedMenuItems[menuItem]);

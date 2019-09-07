@@ -1,15 +1,15 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: neo4j-server
+  name: neo4j-server-maintenance
   labels:
-    app: neo4j-server
+    app: neo4j-server-maintenance
   namespace: default
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: neo4j-server
+      app: neo4j-server-maintenance
   strategy:
     rollingUpdate:
       maxSurge: 25%
@@ -18,23 +18,17 @@ spec:
   template:
     metadata:
       labels:
-        app: neo4j-server
+        app: neo4j-server-maintenance
     spec:
       containers:
-        - image: {{ .Values.images.neo4j-server }}
+        - image: neo4j:latest
           imagePullPolicy: Always
-          name: neo4j-server
-          ports:
-            - containerPort: 7474
-              protocol: TCP
-            - containerPort: 7473
-              protocol: TCP
-            - containerPort: 7687
-              protocol: TCP
+          name: neo4j-server-maintenance
+          command: ["tail", "-f", "/dev/null"]
           volumeMounts:
             - name: neo4j-data
               mountPath: /data
       volumes:
         - name: neo4j-data
           awsElasticBlockStore:
-            volumeID: {{ Values.volumes.neo4j-data.id }}
+            volumeID: vol-0768d8a4bf4ac3670
