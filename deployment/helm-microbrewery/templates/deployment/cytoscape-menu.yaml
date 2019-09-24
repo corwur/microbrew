@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: microbrewery-cytoscape-menu
+  labels:
+    app: microbrewery-cytoscape-menu
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: microbrewery-cytoscape-menu
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: microbrewery-cytoscape-menu
+    spec:
+      containers:
+        - image: 465129930157.dkr.ecr.eu-west-1.amazonaws.com/microbrewery-cytoscape-menu:1.0-SNAPSHOT
+          imagePullPolicy: Always
+          name: microbrewery-cytoscape-menu
+          ports:
+            - containerPort: 8089
+              protocol: TCP
+          env:
+            - name: NEO4J_SERVER_HOST
+              value: "neo4j-server.default.svc.cluster.local"

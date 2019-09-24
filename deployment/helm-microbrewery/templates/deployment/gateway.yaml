@@ -29,7 +29,7 @@ spec:
               protocol: TCP
           env:
             - name: STRUCTURE_URL
-              value: "http://microbrewery-structure.default.svc.cluster.local/crystal"
+              value: "http://microbrewery-structure.default.svc.cluster.local"
             - name: NEO4J_URL
-              value: "http://microbrewery-neo4j.default.svc.cluster.local/"
+              value: "http://microbrewery-cytoscape-menu.default.svc.cluster.local/"
 

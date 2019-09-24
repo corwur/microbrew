@@ -27,7 +27,14 @@ spec:
           ports:
             - containerPort: 7474
               protocol: TCP
-            - conntainerPort: 7474
+            - containerPort: 7473
               protocol: TCP
-            - conntainerPort: 7687
+            - containerPort: 7687
               protocol: TCP
+          volumeMounts:
+            - name: neo4j-data
+              mountPath: /data
+      volumes:
+        - name: neo4j-data
+          awsElasticBlockStore:
+            volumeID: vol-0768d8a4bf4ac3670

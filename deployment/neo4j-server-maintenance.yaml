@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: genomics
+  labels:
+    app: genomics
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: genomics
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: genomics
+    spec:
+      containers:
+        - image: 465129930157.dkr.ecr.eu-west-1.amazonaws.com/microbrewery-genomics:0.1
+          imagePullPolicy: Always
+          name: genomics
+          command: ["tail","-f","/dev/null"]
+          volumeMounts:
+            - name: genomics-data
+              mountPath: /data
+      volumes:
+        - name: genomics-data
+          emptyDir: {}
