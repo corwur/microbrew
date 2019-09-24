@@ -25,17 +25,10 @@ spec:
           imagePullPolicy: Always
           name: microbrewery-gateway
           ports:
-            - containerPort: {{ .Values.images.port }}
+            - containerPort: {{ .Values.ports.gateway }}
               protocol: TCP
           env:
             - name: STRUCTURE_URL
-<<<<<<< HEAD:deployment/helm-microbrewery/templates/deployment/gateway.yaml
-              value: "http://microbrewery-structure.default.svc.cluster.local"
-            - name: NEO4J_URL
-              value: "http://microbrewery-cytoscape-menu.default.svc.cluster.local/"
-=======
-              value: {{ Values.url.structure }}
+              value: {{ .Values.url.structure }}
             - name: CYTOSCAPE_MENU_URL
-              value: {{ Values.url.cytoscape-menu }}
->>>>>>> 20417f34df22c10ab7533ace0a2050287d499d61:deployment/helm-microbrewery/templates/deployment/gateway.yaml
-
+              value: {{ .Values.url.cytoscape_menu }}
