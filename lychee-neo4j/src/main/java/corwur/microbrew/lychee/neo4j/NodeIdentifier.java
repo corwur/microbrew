@@ -1,4 +1,4 @@
-package corwur.microbrew.neo4j;
+package corwur.microbrew.lychee.neo4j;
 
 public class NodeIdentifier {
 	public final long id;

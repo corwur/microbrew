@@ -1,29 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
         <artifactId>microbrew</artifactId>
         <groupId>corwur.microbrew</groupId>
         <version>1.0-SNAPSHOT</version>
-    </parent>
-    <modelVersion>4.0.0</modelVersion>
+  </parent>
+  <artifactId>cytoscape-menu</artifactId>
+  <packaging>jar</packaging>
 
-    <artifactId>structure</artifactId>
-
-    <profiles>
-      <profile>
-        <id>localhost</id>
-		<build>
-			<resources>
-				<resource>
-					<directory>src/main/resources-localhost</directory>
-				</resource>
-			</resources>
-		</build>
-      </profile>
-    </profiles>
-
+  <name>cytoscape-menu</name>
 
     <dependencies>
         <dependency>
@@ -32,11 +18,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
+		    <groupId>nl.corwur</groupId>
+		    <artifactId>cytoscape-neo4j-plugin</artifactId>
+		    <version>0.3</version>
         </dependency>
-    </dependencies>
+	  </dependencies>
 
     <build>
         <plugins>
@@ -44,7 +30,7 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>assamble-jar-with-dependencies</id>
+                        <id>assemble-jar-with-dependencies</id>
                         <phase>package</phase>
                         <goals>
                             <goal>assembly</goal>
@@ -52,7 +38,7 @@
                         <configuration>
                             <archive>
                                 <manifest>
-                                    <mainClass>corwur.microbrew.structure.StructureApplication</mainClass>
+                                    <mainClass>corwur.microbrew.cytoscapemenu.CytoscapeMenuApplication</mainClass>
                                 </manifest>
                             </archive>
                             <descriptorRefs>
@@ -64,5 +50,5 @@
             </plugin>
         </plugins>
     </build>
-    
+ 
 </project>

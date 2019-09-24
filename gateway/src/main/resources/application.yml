@@ -12,7 +12,7 @@ zuul:
       stripPrefix: true
     neo4j:
       path: /api/neo4j/**
-      url: ${NEO4J_URL:#{http://localhost:8089/}}
+      url: ${CYTOSCAPE_MENU_URL:#{http://localhost:8089/}}
       stripPrefix: true
     reference:
       path: /api/genome/**

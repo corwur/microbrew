@@ -1,9 +1,8 @@
-package corwur.microbrew.neo4j.tasks;
+package corwur.microbrew.cytoscapemenu;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import corwur.microbrew.neo4j.tasks.NodeTask.Direction;
 import nl.corwur.cytoscape.neo4j.internal.graph.Graph;
 import nl.corwur.cytoscape.neo4j.internal.neo4j.CypherQuery;
 import nl.corwur.cytoscape.neo4j.internal.neo4j.Neo4jClient;

@@ -21,15 +21,21 @@ spec:
         app: microbrewery-gateway
     spec:
       containers:
-        - image: 465129930157.dkr.ecr.eu-west-1.amazonaws.com/microbrewery-gateway:1.0-SNAPSHOT
+        - image: {{ .Values.images.gateway }}
           imagePullPolicy: Always
           name: microbrewery-gateway
           ports:
-            - containerPort: 8090
+            - containerPort: {{ .Values.images.port }}
               protocol: TCP
           env:
             - name: STRUCTURE_URL
+<<<<<<< HEAD:deployment/helm-microbrewery/templates/deployment/gateway.yaml
               value: "http://microbrewery-structure.default.svc.cluster.local"
             - name: NEO4J_URL
               value: "http://microbrewery-cytoscape-menu.default.svc.cluster.local/"
+=======
+              value: {{ Values.url.structure }}
+            - name: CYTOSCAPE_MENU_URL
+              value: {{ Values.url.cytoscape-menu }}
+>>>>>>> 20417f34df22c10ab7533ace0a2050287d499d61:deployment/helm-microbrewery/templates/deployment/gateway.yaml
 

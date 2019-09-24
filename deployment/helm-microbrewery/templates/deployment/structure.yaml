@@ -21,11 +21,15 @@ spec:
         app: microbrewery-structure
     spec:
       containers:
+<<<<<<< HEAD:deployment/helm-microbrewery/templates/deployment/structure.yaml
         - image: 465129930157.dkr.ecr.eu-west-1.amazonaws.com/microbrewery-structure:1.0-SNAPSHOT
+=======
+        - image: {{ .Values.images.structure }}
+>>>>>>> 20417f34df22c10ab7533ace0a2050287d499d61:deployment/helm-microbrewery/templates/deployment/structure.yaml
           imagePullPolicy: Always
           name: microbrewery-structure
           ports:
-            - containerPort: 8088
+            - containerPort: {{ .Values.port.structure }}
               protocol: TCP
           env:
             - name: NEO4J_SERVER_HOST

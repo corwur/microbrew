@@ -1,4 +1,4 @@
-package corwur.microbrew.neo4j;
+package corwur.microbrew.lychee.neo4j;
 import org.neo4j.driver.v1.*;
 
 import java.io.IOException;

@@ -1,15 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+<<<<<<< HEAD
   name: genomics
   labels:
     app: genomics
+=======
+  name: neo4j-server-maintenance
+  labels:
+    app: neo4j-server-maintenance
+>>>>>>> 20417f34df22c10ab7533ace0a2050287d499d61
   namespace: default
 spec:
   replicas: 1
   selector:
     matchLabels:
+<<<<<<< HEAD
       app: genomics
+=======
+      app: neo4j-server-maintenance
+>>>>>>> 20417f34df22c10ab7533ace0a2050287d499d61
   strategy:
     rollingUpdate:
       maxSurge: 25%
@@ -18,6 +28,7 @@ spec:
   template:
     metadata:
       labels:
+<<<<<<< HEAD
         app: genomics
     spec:
       containers:
@@ -31,3 +42,19 @@ spec:
       volumes:
         - name: genomics-data
           emptyDir: {}
+=======
+        app: neo4j-server-maintenance
+    spec:
+      containers:
+        - image: neo4j:latest
+          imagePullPolicy: Always
+          name: neo4j-server-maintenance
+          command: ["tail", "-f", "/dev/null"]
+          volumeMounts:
+            - name: neo4j-data
+              mountPath: /data
+      volumes:
+        - name: neo4j-data
+          awsElasticBlockStore:
+            volumeID: vol-0768d8a4bf4ac3670
+>>>>>>> 20417f34df22c10ab7533ace0a2050287d499d61

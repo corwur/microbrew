@@ -1,11 +1,18 @@
 package corwur.microbrew.structure;
 
-import corwur.microbrew.neo4j.ApplicationConfiguration;
-import corwur.microbrew.neo4j.ApplicationException;
-import corwur.microbrew.neo4j.CypherClient;
-import corwur.microbrew.structure.model.*;
+import lychee.ApplicationConfiguration;
+import lychee.ApplicationException;
+import corwur.microbrew.lychee.neo4j.CypherClient;
+import corwur.microbrew.structure.model.Backbone;
+import corwur.microbrew.structure.model.Gene;
+import corwur.microbrew.structure.model.GeneIdentifier;
+import corwur.microbrew.structure.model.GeneIndex;
+import corwur.microbrew.structure.model.GeneStructure;
+import corwur.microbrew.structure.model.On;
+import corwur.microbrew.structure.model.Order;
+import corwur.microbrew.structure.model.Organism;
+import corwur.microbrew.structure.model.Sequence;
 import org.neo4j.driver.v1.Value;
-import org.neo4j.driver.v1.Values;
 import org.neo4j.driver.v1.types.Node;
 import org.neo4j.driver.v1.types.Relationship;
 
@@ -25,6 +32,7 @@ public class GeneStructureRepository {
     private static final String GET_GENE_ON = "MATCH (g:gene)-[r:on]-(s:sequence) WHERE g.name=$geneId RETURN g,r,s";
     private static final String GET_ALL_GENES_WITHIN_DISTANCE = "MATCH (n:gene)-[r:backbone*..%d]-(g:gene) WHERE n.name=$geneId RETURN DISTINCT g";
     private static final String GET_ORGANISMS = "MATCH (g:gene)-[r:order]->(t:gene) WHERE g.name IN $genes WITH r.in AS r_in MATCH (o:organism) WHERE o.name=r_in RETURN DISTINCT o";
+    private static final String GET_ALL_ORGANISMS = "MATCH (o:organism) RETURN DISTINCT o";
     private static final String GET_ALL_SEQUENCES = "MATCH (g:gene)-[r:on]->(s:sequence) WHERE g.name IN $genes RETURN g, r, s ORDER BY s.organisme, s.name";
     private static final String GET_ORDER_LINKS = "MATCH (g:gene)-[r:order]->(t:gene) WHERE g.name IN $genes and t.name in $genes RETURN g,r,t";
     private static final String GET_BACKBONE_LINKS = "MATCH (g:gene)-[r:backbone]->(t:gene) WHERE g.name IN $genes and t.name in $genes RETURN g,r,t";
@@ -55,6 +63,7 @@ public class GeneStructureRepository {
             var genes = getGenes(geneIdentifier, distance, cypherClient);
             genes.put(root.name, root);
             var organisms = getOrganisms(genes, cypherClient);
+            //var organisms = getAllOrganisms(cypherClient);
             var sequences = getSequences(genes, cypherClient);
             var order = getOrderLinks(genes, cypherClient);
             var backbone = getBackboneLinks(genes, cypherClient);
@@ -76,6 +85,32 @@ public class GeneStructureRepository {
         }
     }
 
+	public GeneStructure getGenesToOrganisms(GeneIdentifier geneIdentifier) throws ApplicationException {
+        try (CypherClient cypherClient = new CypherClient(uri, user, password)) {
+            var root = getGeneById(geneIdentifier, cypherClient).orElseThrow(ApplicationException::new);
+            Map<String, Gene> genes = new HashMap<>();
+            genes.put(root.name, root);
+            var organisms = getOrganisms(genes, cypherClient);
+            var sequences = getSequences(genes, cypherClient);
+
+            for (Gene gene : genes.values()) {
+                var on = getOnLinks(gene.name, cypherClient);
+                gene.on.addAll(on);
+            }
+
+            return new GeneStructure(
+                    genes.values(),
+                    organisms.values(),
+                    sequences.values(),
+                    null,
+                    null
+            );
+        } catch (IOException e) {
+            throw new ApplicationException();
+        }
+    }
+
+    
     private List<String> getAllGenes(String search, int limit, long offset, CypherClient cypherClient) throws IOException {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("limit", limit);
@@ -122,6 +157,13 @@ public class GeneStructureRepository {
         return result.stream().map(this::createOrganism).collect(Collectors.toMap(Organism::getName, Function.identity()));
     }
 
+    private Map<String, Organism> getAllOrganisms(CypherClient cypherClient) throws IOException {
+        Map<String, Object> parameters = new HashMap<>();
+        var result = cypherClient.runQuery(GET_ALL_ORGANISMS, parameters);
+        return result.stream().map(this::createOrganism).collect(Collectors.toMap(Organism::getName, Function.identity()));
+    }
+
+    
     private Map<String, Sequence> getSequences(Map<String, Gene> genes, CypherClient cypherClient) throws IOException {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("genes", genes.keySet());
@@ -211,4 +253,5 @@ public class GeneStructureRepository {
             return Optional.empty();
         }
     }
+
 }

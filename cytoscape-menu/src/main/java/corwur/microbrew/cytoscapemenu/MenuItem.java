@@ -1,8 +1,8 @@
-package corwur.microbrew.neo4j.tasks;
+package corwur.microbrew.cytoscapemenu;
 
 import java.util.ArrayList;
 
-import corwur.microbrew.neo4j.tasks.NodeTask.Direction;
+import corwur.microbrew.cytoscapemenu.NodeTask.Direction;
 
 public class MenuItem {
 	private final ArrayList<Direction> directions = new ArrayList<>();

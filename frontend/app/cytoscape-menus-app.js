@@ -1,6 +1,7 @@
 const rx = require("rxjs");
 const axios = require("axios");
 const rx_operators = require('rxjs/operators');
+var reactome = require('reactome');
 
 const CytoscapeContextMenus = {
 		
@@ -8,8 +9,7 @@ const CytoscapeContextMenus = {
 		var target = event.target || event.cyTarget;
 		target.remove();
 	},
-	
-	
+
 	removeAddedMenuItems : function() {
 		for (var menuItem in CytoscapeContextMenus.addedMenuItems) {
 			App.cytoscapeContextMenu.removeMenuItem(CytoscapeContextMenus.addedMenuItems[menuItem]);
@@ -115,7 +115,7 @@ const CytoscapeContextMenus = {
 		var target = event.target || event.cyTarget;
 
 		return new rx.Observable( ( observer ) => {
-            axios.get( '/api/neo4j/node/menu/' + type + '/' + target.id())
+            axios.get( '/api/neo4j/node/menu/' + type,  {params: {'id': target.id()}})
                 .then( ( response ) => {
                     observer.next( response.data );
                     observer.complete();
@@ -138,7 +138,7 @@ const CytoscapeContextMenus = {
 		}
 			
 		return new rx.Observable( ( observer ) => {
-			axios.get( '/api/neo4j/node/expand/' + type + '/' + target.id(), {params: {'label': callee.target, 'direction': direction}} )
+			axios.get( '/api/neo4j/node/expand/' + type, {params: {'id': target.id(), 'label': callee.target, 'direction': direction}} )
 			.then( ( response ) => {
 				observer.next( response.data );
 				observer.complete();
@@ -155,7 +155,7 @@ const CytoscapeContextMenus = {
 		var target = event.target || event.cyTarget;
 
 		return new rx.Observable( ( observer ) => {
-            axios.get( '/api/neo4j/node/expand/' + target.id())
+            axios.get( '/api/neo4j/node/expand', {params: {'id': target.id()}})
                 .then( ( response ) => {
                     observer.next( response.data );
                     observer.complete();
@@ -167,8 +167,18 @@ const CytoscapeContextMenus = {
 	},
 	
 	expandNode : function(event) {
-		var observable = CytoscapeContextMenus.expandNodeQuery(event).pipe(rx_operators.share());
-		observable.subscribe(data => CytoscapeContextMenus.expandGraph(event, data));
+		var dataNode = event.target.data();
+		if (dataNode.origin == "neo4j") {
+			var observable = CytoscapeContextMenus.expandNodeQuery(event).pipe(rx_operators.share());
+			observable.subscribe(data => CytoscapeContextMenus.expandGraph(event, data));
+		}
+		else if (dataNode.origin == "reactome"){
+			var observable = reactome.query(event.target.id()).pipe(rx_operators.share());
+			var node = Object();
+			node.id = event.target.id();
+			node.dbId = event.target.id().split("_")[1];
+			observable.subscribe(data => reactome.mapReactomeForCytoscape(data, node));
+		}
 	},
 
 	
@@ -183,7 +193,8 @@ const CytoscapeContextMenus = {
 	            			"label" : data.nodeTable[node]["properties"].name,
 	            			"name" : data.nodeTable[node]["properties"].name,
 	            			"id" : data.nodeTable[node]["properties"].id,
-	            			"type": data.nodeTable[node].labels[0]
+	            			"type": data.nodeTable[node].labels[0],
+	            			origin:"neo4j"
 	            			}} );
             		}
             	}
@@ -195,7 +206,8 @@ const CytoscapeContextMenus = {
 	                	id:data.edgeTable[edge].id, 
 	                	source:data.edgeTable[edge].start, 
 	                	target:data.edgeTable[edge].end,
-	                	label: data.edgeTable[edge].type
+	                	label: data.edgeTable[edge].type,
+	                	origin:"neo4j"
 	                	}} );
             	}
             }

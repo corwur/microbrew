@@ -1,4 +1,4 @@
-package corwur.microbrew.neo4j;
+package corwur.microbrew.lychee.neo4j;
 
 import com.google.gson.Gson;
 import lychee.ResponseWriter;

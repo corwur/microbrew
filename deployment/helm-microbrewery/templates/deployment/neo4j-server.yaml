@@ -21,7 +21,7 @@ spec:
         app: neo4j-server
     spec:
       containers:
-        - image: neo4j:latest
+        - image: {{ .Values.images.neo4j-server }}
           imagePullPolicy: Always
           name: neo4j-server
           ports:
@@ -37,4 +37,8 @@ spec:
       volumes:
         - name: neo4j-data
           awsElasticBlockStore:
+<<<<<<< HEAD:deployment/helm-microbrewery/templates/deployment/neo4j-server.yaml
             volumeID: vol-0768d8a4bf4ac3670
+=======
+            volumeID: {{ Values.volumes.neo4j-data.id }}
+>>>>>>> 20417f34df22c10ab7533ace0a2050287d499d61:deployment/helm-microbrewery/templates/deployment/neo4j-server.yaml
