@@ -21,12 +21,12 @@ spec:
         app: microbrewery-cytoscape-menu
     spec:
       containers:
-        - image: {{ .Values.images.cytoscape_menu}}
+        - image: {{ .Values.images.cytoscape_menu }}
           imagePullPolicy: Always
           name: microbrewery-cytoscape-menu
           ports:
-            - containerPort: {{ .Values.ports.cytoscape_menu}}
+            - containerPort: {{ .Values.ports.cytoscape_menu }}
               protocol: TCP
           env:
             - name: NEO4J_SERVER_HOST
-              value: "neo4j-server.default.svc.cluster.local"
+              value: {{ .Values.hosts.neo4jserver }}

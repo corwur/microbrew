@@ -21,7 +21,7 @@ spec:
         app: neo4j-server
     spec:
       containers:
-        - image: {{ .Values.images.neo4j_server }}
+        - image: {{ .Values.images.neo4jserver }}
           imagePullPolicy: Always
           name: neo4j-server
           ports:
@@ -37,4 +37,4 @@ spec:
       volumes:
         - name: neo4j-data
           awsElasticBlockStore:
-            volumeID: {{ .Values.volumes.neo4j_data.id }}
+            volumeID: {{ .Values.volumes.neo4jdata.id }}
