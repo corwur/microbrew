@@ -15,8 +15,10 @@ import lychee.Server;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.UnrecognizedOptionException;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,7 +35,13 @@ public class StructureApplication {
 
         LOGGER.info("Starting structure app");
         try {
-            CommandLine cmd = parseOptions( args, createOptions());
+            Options options = createOptions();
+            CommandLine cmd = parseOptions( args, options);
+            if(cmd == null) {
+                HelpFormatter formatter = new HelpFormatter();
+                formatter.printHelp( "java -jar <jarfile> ", options );
+                return;
+            }
             StructureConfiguration configuration = getConfiguration(cmd);
 
             LOGGER.log(Level.INFO, "Starting http server on port {0,number,#}", configuration.getPort());
@@ -96,14 +104,18 @@ public class StructureApplication {
 
     private static Options createOptions() {
         Options options = new Options();
-        options.addOption(OPT_CONFIG, "location of application properties file");
+        options.addOption(OPT_CONFIG, true,"location of application properties file");
         return options;
     }
 
     private static CommandLine parseOptions(String[] args, Options options) throws ParseException {
-        CommandLineParser parser = new DefaultParser();
-        CommandLine cmd = parser.parse(options, args);
-        return cmd;
+        try {
+            CommandLineParser parser = new DefaultParser();
+            CommandLine cmd = parser.parse(options, args);
+            return cmd;
+        } catch (UnrecognizedOptionException e) {
+            return null;
+        }
     }
 
 }

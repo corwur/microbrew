@@ -19,8 +19,11 @@ import nl.corwur.cytoscape.neo4j.internal.neo4j.Neo4jClient;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.PatternOptionBuilder;
+import org.apache.commons.cli.UnrecognizedOptionException;
 
 public class CytoscapeMenuApplication {
 
@@ -32,7 +35,13 @@ public class CytoscapeMenuApplication {
 
         try {
             LOGGER.info("Cytoscape menu");
-            CommandLine cmd = parseOptions(args, createOptions());
+            Options options = createOptions();
+            CommandLine cmd = parseOptions(args, options );
+            if(cmd == null) {
+                HelpFormatter formatter = new HelpFormatter();
+                formatter.printHelp( "java -jar <jarfile> ", options );
+                return;
+            }
             CytoscapeMenuConfiguration configuration = getConfiguration(cmd);
 
             LOGGER.info("Starting http server on port: " + configuration.getPort());
@@ -121,14 +130,18 @@ public class CytoscapeMenuApplication {
 
     private static Options createOptions() {
         Options options = new Options();
-        options.addOption(OPT_CONFIG, "location of application properties file");
+        options.addOption(OPT_CONFIG, true, "location of application properties file");
         return options;
     }
 
     private static CommandLine parseOptions(String[] args, Options options) throws ParseException {
         CommandLineParser parser = new DefaultParser();
-        CommandLine cmd = parser.parse(options, args);
-        return cmd;
+        try {
+            CommandLine cmd = parser.parse(options, args);
+            return cmd;
+        } catch (UnrecognizedOptionException e) {
+            return null;
+        }
     }
 
 }
