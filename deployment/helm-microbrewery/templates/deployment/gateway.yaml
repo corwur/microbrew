@@ -29,7 +29,7 @@ spec:
               protocol: TCP
           env:
             - name: STRUCTURE_URL
-              value: {{ Values.url.structure }}
+              value: {{ .Values.url.structure }}
             - name: CYTOSCAPE_MENU_URL
-              value: {{ Values.url.cytoscape-menu }}
+              value: {{ .Values.url.cytoscape_menu }}
 

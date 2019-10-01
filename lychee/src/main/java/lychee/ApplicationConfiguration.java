@@ -1,58 +1,42 @@
 package lychee;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 public class ApplicationConfiguration {
-    private String neo4jUri;
-    private String neo4jUser;
-    private String neo4jPassword;
-    private int port;
 
-    public static ApplicationConfiguration load(String resourceName) throws IOException {
+    private final Properties properties;
 
+    private ApplicationConfiguration(Properties properties) {
+        this.properties = properties;
+    }
+
+    public static ApplicationConfiguration  load(File file) throws IOException {
+        return load(new FileInputStream(file));
+    }
+
+    public static ApplicationConfiguration  load(String resourceName) throws IOException {
+        return load(Thread.currentThread().getContextClassLoader().getResourceAsStream(resourceName));
+    }
+
+    public static ApplicationConfiguration  load(InputStream inputStream) throws IOException {
         Properties properties = new Properties();
-        properties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(resourceName));
+        properties.load(inputStream);
         var propertyValueParser = new PropertyValueParser(System.getenv());
         properties.replaceAll((key, value) -> propertyValueParser.parse(value.toString()));
 
-        ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration();
-        applicationConfiguration.setPort(Integer.parseInt(properties.getProperty("server.port")));
-        applicationConfiguration.setNeo4jUri(properties.getProperty("neo4j.uri"));
-        applicationConfiguration.setNeo4jUser(properties.getProperty("neo4j.user"));
-        applicationConfiguration.setNeo4jPassword(properties.getProperty("neo4j.password"));
+        ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration(properties);
         return applicationConfiguration;
     }
 
-    public int getPort() {
-        return port;
+    public int getInteger(String property) {
+        return Integer.parseInt(properties.getProperty(property));
     }
 
-    public void setPort(int port) {
-        this.port = port;
-    }
-
-    public String getNeo4jUri() {
-        return neo4jUri;
-    }
-
-    public void setNeo4jUri(String neo4jUri) {
-        this.neo4jUri = neo4jUri;
-    }
-
-    public String getNeo4jUser() {
-        return neo4jUser;
-    }
-
-    public void setNeo4jUser(String neo4jUser) {
-        this.neo4jUser = neo4jUser;
-    }
-
-    public String getNeo4jPassword() {
-        return neo4jPassword;
-    }
-
-    public void setNeo4jPassword(String neo4jPassword) {
-        this.neo4jPassword = neo4jPassword;
+    public String getString(String property) {
+        return properties.getProperty(property);
     }
 }

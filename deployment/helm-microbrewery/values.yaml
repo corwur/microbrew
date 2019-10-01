@@ -1,16 +1,16 @@
 images:
   gateway: 465129930157.dkr.ecr.eu-west-1.amazonaws.com/microbrewery-gateway:1.0-SNAPSHOT
   structure: 465129930157.dkr.ecr.eu-west-1.amazonaws.com/microbrewery-structure:1.0-SNAPSHOT
-  cytoscape-menu: 465129930157.dkr.ecr.eu-west-1.amazonaws.com/microbrewery-cytoscape-menu:1.0-SNAPSHOT
-  neo4j-server: neo4j:latest
+  cytoscape_menu: 465129930157.dkr.ecr.eu-west-1.amazonaws.com/microbrewery-cytoscape-menu:1.0-SNAPSHOT
+  neo4j_server: neo4j:latest
 ports:
   gateway: 8090
   structure: 8088
-  cytoscape-menu: 8089
+  cytoscape_menu: 8089
 url:
   structure: http://microbrewery-structure.default.svc.cluster.local/
-  cytoscape-menu: http://microbrewery-cytoscape-menu.default.svc.cluster.local/
-  neo4j-server: http://neo4j-server.default.svc.cluster.local/
+  cytoscape_menu: http://microbrewery-cytoscape-menu.default.svc.cluster.local/
+  neo4j_server: http://neo4j-server.default.svc.cluster.local/
 volumes:
-  neo4j-data:
+  neo4j_data:
     id: vol-0768d8a4bf4ac3670

@@ -1,6 +1,6 @@
 package corwur.microbrew.structure;
 
-import lychee.ApplicationConfiguration;
+import corwur.microbrew.lychee.neo4j.Neo4jConfiguration;
 import lychee.ApplicationException;
 import corwur.microbrew.lychee.neo4j.CypherClient;
 import corwur.microbrew.structure.model.Backbone;
@@ -41,10 +41,10 @@ public class GeneStructureRepository {
     private String user;
     private String password;
 
-    public GeneStructureRepository(ApplicationConfiguration applicationConfiguration) {
-        this.uri = applicationConfiguration.getNeo4jUri();
-        this.user = applicationConfiguration.getNeo4jUser();
-        this.password = applicationConfiguration.getNeo4jPassword();
+    public GeneStructureRepository(Neo4jConfiguration neo4jConfiguration) {
+        this.uri = "bolt://" + neo4jConfiguration.getNeo4jUri();
+        this.user = neo4jConfiguration.getNeo4jUser();
+        this.password = neo4jConfiguration.getNeo4jPassword();
     }
 
     public GeneIndex getGeneIndex(String search, int limit, long offset) throws ApplicationException {

@@ -25,5 +25,8 @@ spec:
           imagePullPolicy: Always
           name: microbrewery-structure
           ports:
-            - containerPort: {{ .Values.port.structure }}
+            - containerPort: {{ .Values.ports.structure }}
               protocol: TCP
+          env:
+            - name: NEO4J_SERVER_HOST
+              value: "neo4j-server.default.svc.cluster.local"
