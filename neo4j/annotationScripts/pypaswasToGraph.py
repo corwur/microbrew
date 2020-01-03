@@ -1,13 +1,13 @@
 import sys
-from neo4j.v1 import GraphDatabase, basic_auth
+from neo4j import GraphDatabase, basic_auth
 from collections import defaultdict
 import json
 # server settings
 hostname = "localhost"
-username = "annotation"
-password = "annotation"
+username = "neo4j"
+password = "Neo4j"
 
-minRelativeScore = 6.0
+minRelativeScore = 0.0
 
 # connect to neo4j
 driver = GraphDatabase.driver("bolt://{}".format(hostname), auth=basic_auth(username, password))
@@ -55,7 +55,7 @@ class Hit:
     
     def __str__(self):
         #print(self.properties)
-        return (" -[:alignsWith {{ " + ",".join([k + ": {" + k + "}" for k in self.properties.keys()]) + " }}] -> ").format(**self.properties)
+        return (" -[:alignsWith {{ " + ",".join([k + ": {" + k + "}" for k in self.properties.keys()]) + " }}] - ").format(**self.properties)
 
 bestHits = {}
 
@@ -67,11 +67,17 @@ for f in open(sys.argv[1], "r"):
                 bestHits[hit.query()] = hit
             elif bestHits[hit.query()].score() < hit.score():
                 bestHits[hit.query()] = hit
+                
+            if hit.target() not in bestHits:
+                bestHits[hit.target()] = hit
+            elif bestHits[hit.target()].score() < hit.score():
+                bestHits[hit.target()] = hit
+                
 
 for i in bestHits:
     #print(bestHits[i].relativeScore())
-    query = "match (n1:gene {{protein_id: {n1_protein_id}}}), (n2:gene {{protein_id: {n2_protein_id}}}) merge (n1) ".format(
+    query = "match (n1:gene ), (n2:gene) where {n1_protein_id} in n1.protein_id and {n2_protein_id} in n2.protein_id merge (n1) ".format(
             n1_protein_id = bestHits[i].query(),
-            n2_protein_id = bestHits[i].target()) + str(bestHits[i]) + "(n2) return n1,n2"
-    print(query)
+            n2_protein_id = bestHits[i].target()) + str(bestHits[i]) + "(n2);"
+    session.run(query)
 session.close()
