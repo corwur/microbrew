@@ -31,7 +31,7 @@ class Hit:
         self.properties['end'] = l[4].split(":")[1]
         self.properties['`NB-ARC`'] = toStr(l[5])
         self.properties['`2-NBLRR-Signal`'] = toStr(l[6])
-        self.properties['MotifList'] = "" #[int(x) for x in l[7].split(',')]
+        self.properties['MotifList'] = "''" #[int(x) for x in l[7].split(',')]
         
         
     def query(self):

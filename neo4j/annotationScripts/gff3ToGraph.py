@@ -69,7 +69,7 @@ for f in sys.argv[1:]:
             start = l[3]
             end = l[4]
             geneID = l[8].strip()
-            if ";" in geneID:
+            if ";" in geneID or (not ',' in geneID):
                 ids = geneID.split(";")
                 for g in ids:
                     key_value = g.split("=")
@@ -112,7 +112,10 @@ for f in sys.argv[1:]:
                 gene = Gene(geneID)
                 geneIDs[geneID] = gene
                 structureQuery.append(gene)
-                gene.set({"name": properties["name"]})
+                if "name" in properties:
+                    gene.set({"name": properties["name"]})
+                else:
+                    gene.set({"name": properties["id"]})
                 properties = {}
                 chrQuery.append("match(m:sequence), (n:gene) where m.name ='{seq}' and m.organism = '{org}' and n.ID = '{gene}' merge (n) -[:on {{start: {start}, end: {end}}}]-> (m) ;".format(start=start, end=end, gene=geneID, seq=chr, org=organism))
             elif node in ["mRNA","lnc_RNA", "CDS"] :
@@ -146,4 +149,7 @@ for f in sys.argv[1:]:
         print("match (b:organism), (n:sequence) where b.name = '{org}' and n.name = '{seq}' and n.organism = '{org}' merge (n) -[:from]->(b) ;".format(seq=s, org=organism))
     #createSequenceStructure(organism)
 
+# MATCH (n:gene) where n.genome = 'Capsicum chacoense' set n.protein_id = [n.ID + ".t1"]
+# MATCH (n:gene)-[:on]-(s:sequence) where s.organism = 'C.chacoense_102' set n.genome = 'Capsicum chacoense'
+# MATCH (n:gene)-[:on]-(s:sequence) set n.chromosome = s.chromosome
 session.close()
