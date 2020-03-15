@@ -1,9 +1,11 @@
-package corwur.microbrew.cytoscapemenu;
+package corwur.microbrew.cytoscapemenu.model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import corwur.microbrew.cytoscapemenu.model.MenuItem;
+import corwur.microbrew.cytoscapemenu.model.NodeTask;
 import org.neo4j.driver.internal.value.ListValue;
 import org.neo4j.driver.v1.Record;
 import org.neo4j.driver.v1.StatementResult;
@@ -12,7 +14,7 @@ import nl.corwur.cytoscape.neo4j.internal.neo4j.CypherQuery;
 import nl.corwur.cytoscape.neo4j.internal.neo4j.Neo4jClient;
 import nl.corwur.cytoscape.neo4j.internal.neo4j.Neo4jClientException;
 
-public class MenuLabelTask extends NodeTask{
+public class MenuLabelTask extends NodeTask {
 	
 	private final Map<String, MenuItem> menu = new HashMap<>();
 	

@@ -4,19 +4,19 @@ zuul:
   routes:
     pathway:
       path: /api/pathway/**
-      url: ${PATHWAY_URL:#{http://localhost:8081/}}
+      url: ${PATHWAY_URL:http://localhost:8081/}
       stripPrefix: true
     structure:
       path: /api/structure/**
-      url: ${STRUCTURE_URL:#{http://localhost:8088/}}
+      url: ${STRUCTURE_URL:http://localhost:8088/}
       stripPrefix: true
     neo4j:
       path: /api/neo4j/**
-      url: ${CYTOSCAPE_MENU_URL:#{http://localhost:8089/}}
+      url: ${CYTOSCAPE_MENU_URL:http://localhost:8089/}
       stripPrefix: true
     reference:
       path: /api/genome/**
-      url: ${GENOME_URL:#{http://localhost:8080/}}
+      url: ${GENOME_URL:http://localhost:8087/}
       stripPrefix: true
     reactome:
       path: /api/reactome/**

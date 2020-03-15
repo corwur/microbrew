@@ -66,6 +66,7 @@ public class StructureApplication {
                 var genes = geneStructureRepository.getAllGenesWithinDistance(geneIdentfier, distance);
                 response.ok(genes);
             } catch (ApplicationException e) {
+                LOGGER.log(Level.SEVERE, "Error handling request", e);
                 throw new IllegalStateException(e);
             }
         }));
@@ -76,6 +77,7 @@ public class StructureApplication {
                 var genes = geneStructureRepository.getGenesToOrganisms(geneIdentfier);
                 response.ok(genes);
             } catch (ApplicationException e) {
+                LOGGER.log(Level.SEVERE, "Error handling request", e);
                 throw new IllegalStateException(e);
             }
         }));
@@ -89,6 +91,7 @@ public class StructureApplication {
                 geneIndex = geneStructureRepository.getGeneIndex(search, limit, offset);
                 response.ok(geneIndex);
             } catch (ApplicationException e) {
+                LOGGER.log(Level.SEVERE, "Error handling request", e);
                 throw new IllegalStateException(e);
             }
         }));
@@ -117,5 +120,4 @@ public class StructureApplication {
             return null;
         }
     }
-
 }

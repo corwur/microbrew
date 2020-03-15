@@ -1,8 +1,8 @@
-package corwur.microbrew.cytoscapemenu;
+package corwur.microbrew.cytoscapemenu.model;
 
 import java.util.ArrayList;
 
-import corwur.microbrew.cytoscapemenu.NodeTask.Direction;
+import corwur.microbrew.cytoscapemenu.model.NodeTask.Direction;
 
 public class MenuItem {
 	private final ArrayList<Direction> directions = new ArrayList<>();

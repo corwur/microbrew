@@ -1,4 +1,4 @@
-package corwur.microbrew.cytoscapemenu;
+package corwur.microbrew.cytoscapemenu.model;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -9,7 +9,7 @@ import nl.corwur.cytoscape.neo4j.internal.neo4j.Neo4jClient;
 import nl.corwur.cytoscape.neo4j.internal.neo4j.Neo4jClientException;
 
 
-public class ExpandNodeTask extends NodeTask{
+public class ExpandNodeTask extends NodeTask {
 	
     private String edge;
     private String node;

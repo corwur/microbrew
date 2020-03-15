@@ -1,504 +1,126 @@
 'use strict';
-const rx = require('rxjs');
-const rx_operators = require('rxjs/operators');
-
-var bootstrap = require('bootstrap');
-var jquery = require('jquery');
-var pileup = require('pileup');
-var cytoscape = require('cytoscape');
-var cytoscapeContextMenus = require('cytoscape-menus-app');
-var contextMenus = require('cytoscape-context-menus');
-var graphTable = require('graph-table');
-var geneStructure = require('gene-structure');
-var reactome = require('reactome');
-var circos = require('circos');
-var Colors = require('Colors');
-
-cytoscape.use(contextMenus, jquery ); // register extension
+import bootstrap from 'bootstrap'
+import {Subject} from 'rxjs'
+import 'lodash.merge';
+import {GeneStructureService} from "./services/gene-structure-service";
+import {GenomeService} from "./services/genome-service";
+import {Neo4jNodeMenuService} from "./services/neo4j-node-menu-service";
+import {ReactomeService} from "./services/reactome-service";
+import { GeneStructureComponent } from 'components/gene-structure/gene-structure-component';
+import { SelectGeneForm } from 'components/gene-structure/select-gene-form'
+import { CircleDiagramComponent } from 'components/circle-diagram/circle-diagram-component'
+import { GenomeBrowser} from "./components/genome-browser/genome-browser-component";
+import {ReactomeComponent} from "./components/reactome/reactome-component";
+import {filter, flatMap, map} from "rxjs/operators";
 
 
-const geneIdentifierSubject = new rx.Subject();
+class Application {
 
+    constructor() {
+        this.subject = new Subject()
+        this.geneStructureService = new GeneStructureService()
+        this.neo4jNodeMenuService = new Neo4jNodeMenuService()
+        this.genomeService = new GenomeService()
+        this.reactomeService = new ReactomeService()
+    }
 
-const App = {
-
-
-    selectGene: function(elem, event) {
-        event.returnValue = false;
-        var geneId = elem.elements[0].value
-        var distance = elem.elements[1].value ? elem.elements[1].value : 1;
-        geneIdentifierSubject.next({ geneId:geneId, distance:distance})
-        return false
-    },
-    clickGene: function(geneId, event) {
-        event.returnValue = false;
-        document.getElementById("selectGeneId").value=geneId
-        document.getElementById("gene-id-autocomplete").innerHTML=""
-        return false
-    },
-    findGene: function(elem) {
-        var geneId = elem.value;
-        if(geneId && geneId.length >=1) {
-            geneStructure.findGene(geneId + ".*").subscribe(data => {
-                var list = document.getElementById("gene-id-autocomplete")
-                //console.log(JSON.stringify(data))
-                var html = '<ul class="select-gene">' +
-                    data.genes.map(geneId => '<li><a href="#" onclick="App.clickGene(\'' + geneId + '\', event)">' + geneId + '</a></li>').reduce((a,b) => a + b) + '</ul>'
-                list.innerHTML = html
-            })
-        }
-    },
-
-
-    getGeneStructure: function(geneIdentifier, distance) {
-    	App.geneIdentifier = geneIdentifier;
-        var observable = App.geneStructure.getStructure(geneIdentifier, distance).pipe(rx_operators.share());
-
-        observable.subscribe(App.renderStructureGraph);
-        //observable.subscribe(App.renderCircleDiagram);
-
-    },
-
-     
-    addStructure: function(data){
-    	var genes = [];
-    	for (var j=0; j < data.genes.length; j++) {
-	    	var found = 0
-	    	
-	    	while (found < App.structureData.genes.length && App.structureData.genes[found].id != data.genes[j].id) {
-		    	found += 1;
-	    	}
-	    	if (found == App.structureData.genes.length) {
-	    		genes.push(data.genes[j]);
-	    	}
-    	}
-    	App.structureData.genes = App.structureData.genes.concat(genes);
-    	
-    	var organisms = [];
-    	for (var j=0; j < data.organisms.length; j++) {
-	    	var found = 0
-	    	
-	    	while (found < App.structureData.organisms.length && App.structureData.organisms[found].id != data.organisms[j].id) {
-		    	found += 1;
-	    	}
-	    	if (found == App.structureData.organisms.length) {
-	    		organisms.push(data.organisms[j]);
-	    	}
-    	}
-    	App.structureData.organisms = App.structureData.organisms.concat(organisms);
-    	
-
-    	var sequences = [];
-    	for (var j=0; j < data.sequences.length; j++) {
-	    	var found = 0
-	    	
-	    	while (found < App.structureData.sequences.length && App.structureData.sequences[found].id != data.sequences[j].id) {
-		    	found += 1;
-	    	}
-	    	if (found == App.structureData.sequences.length) {
-	    		sequences.push(data.sequences[j]);
-	    	}
-    	}
-    	App.structureData.sequences = App.structureData.sequences.concat(sequences);
-
-    	App.renderCircleDiagram();
-    },
-    
-    getGeneToOrganisms: function(nodeData) {
-    	if (nodeData.origin == "neo4j" && nodeData.type == "gene") {
-    		var observable = App.geneStructure.getGeneToOrganisms(nodeData.name).pipe(rx_operators.share());
-	        
-	        //observable.subscribe(App.renderCircleDiagram);
-	        observable.subscribe(App.addStructure);
-    	}
-    },
-
-    
-    expandNodeLabelsMenu : function(event) {
-    	var observable = App.cytoscapeContextMenus.getExpandNodeLabelsMenu(event).pipe(rx_operators.share());
-    	observable.subscribe(App.cytoscapeContextMenus.createExpandNodeLabelsMenu); 
-    },
-    expandNodeEdgesMenu : function(event) {
-    	var observable = App.cytoscapeContextMenus.getExpandNodeEdgesMenu(event).pipe(rx_operators.share());
-    	observable.subscribe(App.cytoscapeContextMenus.createExpandNodeEdgesMenu); 
-    },
-    
-
-    createCircosSelect: function() {
-    	App.organisms = new Set();
-        for(var index = 0; index < App.structureData.sequences.length; index ++) {
-        	App.organisms.add(App.structureData.sequences[index].organism)
-        }
-        var select = $('#circos_organism');
-        var selectedOrganisms = new Set()
-        for (var o=0; o < select[0].selectedOptions.length; o++) {
-        	selectedOrganisms.add(select[0].selectedOptions[o].value);
-
-        }
-        select.empty();
-        App.organisms.forEach(function(o){
-        	var selected = true;
-        	if (selectedOrganisms.size > 0) {
-        		selected = selectedOrganisms.has(o);
-        	}
-        	select.append($('<option>', {value:o, text: o, selected:selected}))
-        });
-    },
-    
-    renderStructureGraph: function(data) {
-    	App.structureData = data;
-    	App.createCircosSelect();
-        const convertToCyData = function(data) {
-            var cyData = []
-            for(var index =0; index < data.genes.length ; index++) {
-            	var selected = data.genes[index].name == App.geneIdentifier;
-                cyData.push({ group:'nodes',  position: { x: 200, y: 200 }, data: {
-                	label:data.genes[index].name,
-                	id:data.genes[index].id, 
-                	weight:20, 
-                	selected:selected,
-                	origin:"neo4j"
-                	} } )
-            }
-            // for(var index =0; index < data.order.length ; index++) {
-            //     cyData.push({ group:'edges', data: { organism:data.order[index].organism,  id:"order" + index, source:data.order[index].from, target:data.order[index].to } } )
-            // }
-            for(var index =0; index < data.backbone.length ; index++) {
-                cyData.push({ group:'edges', data: { 
-                	id:data.backbone[index].id, 
-                	source:data.backbone[index].from, 
-                	target:data.backbone[index].to,
-                	label: "backbone",
-                	of: data.backbone[index].of,
-                	weight: data.backbone[index].of,
-                	origin:"neo4j"}} )
-            }
-
-            return cyData;
-        }
-
-        var cyData = convertToCyData(data);
-        App.cy.remove('*');
-        App.cy.add(cyData);
-        
-        App.cy.layout({ name: 'cose'}).run();
-    },
-
-    renderCircleDiagram: function() {
-    	var seqlength = parseInt($('#circos_seqlength')[0][$('#circos_seqlength')[0].selectedIndex].value);
-    	var structureData  = App.structureData;
-    	if (structureData == null) return;
-    	document.getElementById('circos').innerHTML = "";
-    	App.circos =  new circos({
-            container: document.getElementById('circos'),
-            width: 600,
-            height: 600,
-        });
-    	
-        var configuration = {
-            innerRadius: 250,
-            outerRadius: 260,
-            cornerRadius: 10,
-            gap: 0.01, // in radian
-            labels: {
-                display: true,
-                position: 'center',
-                size: '14px',
-                color: '#000000',
-                radialOffset: 20
-            },
-            ticks: {
-                display: false,
-                color: 'grey',
-                spacing: 10000000,
-                labels: true,
-                labelSpacing: 10,
-                //labelSuffix: 'Mb',
-                //labelDenominator: 1000000,
-                labelDisplay0: true,
-                labelSize: '40px',
-                labelColor: '#000000',
-                labelFont: 'default',
-                majorSpacing: 5,
-                size: {
-                    minor: 2,
-                    major: 5,
-                }
-            },
-            events: {}
-        }
-        
-        //organisms
-        var data = [];
-        var contigs = new Set();
-        var colors = {};
-        var colors = new Colors();
-    	var selectedOrganisms = new Set();
-        var select = $('#circos_organism');
-        for (var o=0; o < select[0].selectedOptions.length; o++) {
-        	selectedOrganisms.add(select[0].selectedOptions[o].value);
-        }
-        
-        for(var index = 0; index < structureData.sequences.length; index ++) {
-        	var name = structureData.sequences[index].name;
-
-        	//console.log(structureData.sequences[index].length);
-        	
-        	if (structureData.sequences[index].length >= seqlength && selectedOrganisms.has(structureData.sequences[index].organism) ) {
-	        	if (!colors[structureData.sequences[index].organism]){
-	        		colors[structureData.sequences[index].organism] = colors.pick();
-	        	}
-	            data.push( { len: structureData.sequences[index].length, 
-	            			color: colors[structureData.sequences[index].organism], 
-	            			label: name, 
-	            			id: ""+structureData.sequences[index].id,
-	            			organims : structureData.sequences[index].organism} );
-	        	contigs.add(structureData.sequences[index].id);
-	        }
-        }
-        data.sort(function(x,y) {
-        	if (x.organism == y.organism) {
-        		return x.label < y.label;
-        	}
-        	else {
-        		return x.organism < y.organism;
-        	}
+    in(observable, method) {
+        observable.subscribe(data => {
+            console.log("Application in " + JSON.stringify(data))
+            method.apply(this, [data])
         })
-        
-      //console.log(contigs);	
-        App.circos.layout(data, configuration);
-        var colors = new Colors(); 
-    	var pathways = [];
-    	var genes = [];
-        for (var index =0; index < structureData.genes.length; index++){
-            var data = [];
-        	// get nodes from cytoscape
-        	var pathwayNodes = App.cy.nodes("#"+structureData.genes[index].id).connectedEdges("[origin ='reactome']").connectedNodes();
-        	for (var source=0; source < structureData.genes[index].on.length; source++){
-        		if (contigs.has(structureData.genes[index].on[source].sequenceID)) {
-        			genes.push({block_id: "" + structureData.genes[index].on[source].sequenceID, 
-	        					start:structureData.genes[index].on[source].start,
-	        					end:structureData.genes[index].on[source].end,
-	        					label: structureData.genes[index].name})
-        			for (var p=0; p < pathwayNodes.length; p++) {
-        				if (pathwayNodes[p].data().origin == "reactome"){
-	        				pathways.push({block_id: "" + structureData.genes[index].on[source].sequenceID, 
-	        					start:structureData.genes[index].on[source].start,
-	        					end:structureData.genes[index].on[source].end,
-	        					label: pathwayNodes[p].data().name});
-        				}
-        			}
-        		}
-            	for (var target=source+1; target < structureData.genes[index].on.length; target++){
-            		if (contigs.has(structureData.genes[index].on[source].sequenceID) && contigs.has(structureData.genes[index].on[target].sequenceID) ) { 
-            			data.push({
-            					source:{
-            						id:""+structureData.genes[index].on[source].sequenceID, 
-            						start:structureData.genes[index].on[source].start,
-            						end:structureData.genes[index].on[source].end},
-            					target:{
-            						id:""+structureData.genes[index].on[target].sequenceID, 
-            						start:structureData.genes[index].on[target].start,
-            						end:structureData.genes[index].on[target].end},
-            					})
-            		}
-            		
-            						
-            	}
-            	
-           
-        	}
-        	
-            App.circos.chords("links_"+structureData.genes[index].name.replace(/[\|\.]/g,"_"), data, {
-            	radius: 0.89,
-            	color:colors.pick(),
-                tooltipContent: function (datum, index) {
-                    return "";
-                  }});
-        }
-    	App.circos.stack('pathways', pathways, {
-    		color:'red',
-    		innerRadius:1.01,
-    		outerRadius:1.2,
-    		tooltipContent: function (datum, index) {
-                return datum.label;}});
-    	App.circos.stack('genes', genes, {
-    		color:'blue',
-    		innerRadius:0.9,
-    		outerRadius:0.99,
-    		tooltipContent: function (datum, index) {
-                return datum.label;}});
+    }
 
-        
-   
-        
-        App.circos.render();
-    },
+    out(object, methodName, appEvent) {
+        const method = object[methodName]
+        this.subject.asObservable()
+            .pipe(filter(data => data.hasOwnProperty(appEvent)))
+            .subscribe(data => method.apply(object, [data[appEvent]]))
+    }
 
-    createDiagram: function(){
-    	App.diagram = Reactome.Diagram.create({
-            "placeHolder" : "reactome",
-            "width" : 1000,
-            "height" : 800
-    	});
-    	App.diagram.onObjectSelected(function(obj) {console.log(obj)});
-    },
-    
-    loadDiagram: function() {
-    	reactome.getPathwayJS(App.selectedPathway);
-    },
+    onSelectGeneId(arg) {
+        console.log("onSelectGeneId:" + JSON.stringify(arg))
+        this.getGeneStructure(arg.geneId, arg.distance)
+    }
 
-    setPathwayInformation : function(event) {
-    	var data = event.target.data();
-    	if (data.origin="reactome"){
-    		App.selectedPathway = data.stId;
-    	}
-    	else {
-    		App.selectedPathway = null;
-    	}
-    },
-    
-    init(config) {
-    
-        App.geneStructure = geneStructure;
-        App.structureData = null;
-        App.selectedPathway = null;
-        App.organisms = new Set();
-        App.cy = cytoscape({
-            container: document.getElementById('cy'),
-            elements: [
-            ],
+    onFindGeneId(arg) {
+        console.log("onFindGeneId:" + JSON.stringify(arg))
+        this.findGene(arg)
+    }
 
-            style: [ // the stylesheet for the graph
-                {
-                    selector: 'node',
-                    style: {
-                    	'font-size':4,
-                    	'width':6,
-                    	'height':6,
-                        'background-color': "green",
-                        'label': 'data(label)'
-                    }
-                },
-                {
-                    selector: 'node[?selected]',
-                    style: {
-                        'background-color': 'blue',
-                        'color' : 'blue'
-                    }
-                	
-                },
-                {
-                    selector: 'node[origin = "reactome"]',
-                    style: {
-                        'background-color': 'red',
-                        'color' : 'red',
-                    	'width':5,
-                    	'height':5
-                    }
-                	
-                },
-                {
-                    selector: 'node[schemaClass = "Pathway"]',
-                    style: {
-                        'background-color': 'black',
-                        'color' : 'black',
-                    	'width':8,
-                    	'height':8
-                    }
-                	
-                },
-                {
-                    selector: 'edge',
-                    style: {
-                        'width': 1,
-                        'font-size' : 2,
-                        'line-color': 'blue',
-                        'target-arrow-color': 'blue',
-                        'target-arrow-shape': 'triangle',
-                        "curve-style": "bezier",
-                        label:"data(label)"//,
-                        //width:"mapData(weight, 0, 100, 2, 10)"
-                    }
-                },
-                {
-                    selector: 'edge[origin = "reactome"]',
-                    style: {
-                        'line-color': 'red',
-                        'target-arrow-color': 'red',
-                        'target-arrow-shape': 'triangle'
-                    }
-                	
-                }
-            ],
+    onExpandGene() {
+        this.neo4jNodeMenuService.expandNodeQuery()
+    }
 
-            layout: {
-            	name: 'cose'
-            }
-        });
+    onExpandNodeEdgesMenu(arg) {
+        console.log("onExpandNodeEdgesMenu " + JSON.stringify(arg))
+    }
 
-      
-        App.cytoscapeContextMenu = cytoscapeContextMenus.create(App.cy);
-        App.cytoscapeContextMenus = cytoscapeContextMenus
-        geneIdentifierSubject.subscribe((req) => App.getGeneStructure(req.geneId,req.distance));
-        geneIdentifierSubject.subscribe((req) => console.log("gene identifier is: "  + JSON.stringify(req)));
-        //geneIdentifierSubject.subscribe((req) => App.getPathwayInformation(req.geneId));
-        
-        App.cy.on('cxttapstart','node', function(event) { 
-        	App.cytoscapeContextMenus.removeAddedMenuItems();
-        	if (event.target.data().origin == "neo4j") {
-	        	App.expandNodeLabelsMenu(event);
-	        	App.expandNodeEdgesMenu(event);
-        	}
-        	});
-        App.cy.on('click', 'node', function(event) {
-        	graphTable.nodeTable(event);
-        	App.setPathwayInformation(event);
-        });
-        App.cy.on('click', 'edge', function(event) {
-        	graphTable.edgeTable(event);
-        });
-        App.cy.on('add', 'node', function(event){
-        	reactome.getPathwayInformationForCytoscape(event.target.data());
-        	App.getGeneToOrganisms(event.target.data());
-        	App.createCircosSelect();
-        	App.renderCircleDiagram();
-        	
-      
-        });
-        
-        
-        
-        
-        console.log('App initialized.');
+    onExpandNodeLabelsMenu(arg) {
+        console.log("onExpandNodeLabelsMenu " + JSON.stringify(arg))
+        this.getNeo4jNodeMenu(arg.id, "labels")
+    }
 
-
-        // var pileup = require('pileup');
-        var p = pileup.create(config.node, {
-            range: {contig: 'chr17', start: 7512384, stop: 7512544},
-            tracks: [
-                {
-                    viz: pileup.viz.genome(),
-                    isReference: true,
-                    data: pileup.formats.twoBit({
-                        url: 'http://www.biodalliance.org/datasets/hg19.2bit'
-                    }),
-                    name: 'Reference'
-                },
-                {
-                    viz: pileup.viz.pileup(),
-                    data: pileup.formats.bam({
-                        url: '/test-data/synth3.normal.17.7500000-7515000.bam',
-                        indexUrl: '/test-data/synth3.normal.17.7500000-7515000.bam.bai'
-                    }),
-                    cssClass: 'normal',
-                    name: 'Alignments'
-                }
-            ]
-        });
-
+    onExpandNodeMenu(arg) {
+        console.log("onExpandNodeMenu " + JSON.stringify(arg))
+        // if (dataNode.origin == "neo4j") {
+        // }
+        // else if (dataNode.origin == "reactome"){
+        // 	this.subject.next({expandNodeQuery:event.target.id()})
+        // 	var observable = this.reactomeService.query(event.target.id())
+        // 	var node = Object();
+        // 	node.id = event.target.id();
+        // 	node.dbId = event.target.id().split("_")[1];
+        // 	observable.subscribe(data => reactome.mapReactomeForCytoscape(data, node));
+        // }
 
     }
-};
+    onExpandNode(arg) {
+        console.log("onExpandNode " + JSON.stringify(arg))
+        this.getNeo4jExpandNode(arg.id)
+    }
 
-module.exports = App;
+    getNeo4jExpandNode(nodeId, type) {
+        this.neo4jNodeMenuService.expandNodeQuery(nodeId)
+            .subscribe(data => this.subject.next({expandNode: data}))
+    }
+
+    getNeo4jNodeMenu(nodeId, type) {
+        this.neo4jNodeMenuService.getExpandNodeMenu(nodeId, type)
+            .subscribe(data => this.subject.next({expandNodeMenu: data}))
+    }
+
+    getGeneStructure(geneIdentifier, distance) {
+        this.geneStructureService.getStructure(geneIdentifier, distance).subscribe(geneStructure => {
+            this.subject.next({"geneStructure":geneStructure})
+        })
+    }
+
+    findGene(geneIdentifier) {
+        this.geneStructureService.findGene(geneIdentifier + ".*")
+            .subscribe(geneList => {
+                this.subject.next({"findGene":geneList})
+            })
+    }
+}
+const app = new Application()
+
+const selectGeneForm = new SelectGeneForm()
+const geneStructureComponent = new GeneStructureComponent()
+
+app.in(selectGeneForm.getSelectedGeneIdObservable(), app.onSelectGeneId)
+app.in(selectGeneForm.getFindGeneIdObservable(), app.onFindGeneId)
+app.out(selectGeneForm, "showGeneIdList", "findGene")
+
+app.in(geneStructureComponent.getExpandNodeEdgesMenuAsObservable(), app.onExpandNodeEdgesMenu)
+app.in(geneStructureComponent.getExpandNodeLabelsMenuAsObservable(), app.onExpandNodeLabelsMenu)
+app.in(geneStructureComponent.getExpandNodeMenuAsObservable(), app.onExpandNodeMenu)
+app.in(geneStructureComponent.getExpandNodeAsObservable(), app.onExpandNode)
+
+app.out(geneStructureComponent,  "renderStructureGraph", "geneStructure")
+app.out(geneStructureComponent, "expandNodeMenu" , "expandNodeMenu")
+app.out(geneStructureComponent, "addStructure" , "expandNode")
+
+selectGeneForm.init()
+geneStructureComponent.init({ id:'cy'})
+

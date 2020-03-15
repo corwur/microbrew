@@ -2,8 +2,8 @@ module.exports = {
     files: {
         javascripts: {
             joinTo: {
-                'app.js' : 'app/*.js',
-                'js/vendor.js': /^node_modules/ 
+                'app.js' : 'app/**/*.js',
+                'js/vendor.js': /^node_modules/
 
             },
         },
@@ -13,6 +13,11 @@ module.exports = {
                 'css/app.css': 'app/styles/*.css',
                 'css/vendor.css': /^node_modules/ 
             }
+        }
+    },
+    modules: {
+        autoRequire: {
+            'app.js' : ['application']
         }
     },
     paths: {

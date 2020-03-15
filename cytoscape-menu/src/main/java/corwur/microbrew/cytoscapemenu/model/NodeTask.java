@@ -1,4 +1,4 @@
-package corwur.microbrew.cytoscapemenu;
+package corwur.microbrew.cytoscapemenu.model;
 
 import nl.corwur.cytoscape.neo4j.internal.neo4j.Neo4jClient;
 

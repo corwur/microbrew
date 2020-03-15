@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import corwur.microbrew.lychee.neo4j.Neo4jConfiguration;
+import corwur.microbrew.cytoscapemenu.model.ExpandNodeTask;
+import corwur.microbrew.cytoscapemenu.model.MenuEdgesTask;
+import corwur.microbrew.cytoscapemenu.model.MenuLabelTask;
 import corwur.microbrew.lychee.neo4j.GsonResponseWriter;
 import corwur.microbrew.lychee.neo4j.NodeIdentifier;
 import lychee.ApplicationConfiguration;
@@ -22,7 +24,6 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PatternOptionBuilder;
 import org.apache.commons.cli.UnrecognizedOptionException;
 
 public class CytoscapeMenuApplication {
@@ -66,6 +67,7 @@ public class CytoscapeMenuApplication {
             try {
                 response.ok(expandNodeTask.expand());
             } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "An exception occured", e);
                 response.internalServerError("Error executing expand node task");
             }
         }));
@@ -76,6 +78,7 @@ public class CytoscapeMenuApplication {
                 menuLabelTask.createMenuItem();
                 response.ok(menuLabelTask.getMenu());
             } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "An exception occured", e);
                 response.internalServerError("Error executing expand menu label task");
             }
         }));
@@ -86,6 +89,7 @@ public class CytoscapeMenuApplication {
                 menuEdgesTask.createMenuItem();
                 response.ok(menuEdgesTask.getMenu());
             } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "An exception occured", e);
                 response.internalServerError("Error executing expand menu edge task");
             }
         }));
@@ -101,6 +105,7 @@ public class CytoscapeMenuApplication {
             try {
                 response.ok(expandNodeTask.expand());
             } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "An exception occured", e);
                 response.internalServerError("Error executing expand menu label task");
             }
         }));
@@ -115,6 +120,7 @@ public class CytoscapeMenuApplication {
             try {
                 response.ok(expandNodeTask.expand());
             } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "An exception occured", e);
                 response.internalServerError("Error executing expand menu label task");
             }
         }));

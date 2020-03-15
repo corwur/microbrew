@@ -1,4 +1,4 @@
-var Colors = class  {
+export class Colors  {
 	constructor() {
 		this.colors = ["#A4262C", "#8F7034","#407855","#038387","#CA5010","#0078D4","#40587C","#4052AB","#854085","#8764B8","#737373","#867365"];
 		this.currentColor = 0;
@@ -12,5 +12,3 @@ var Colors = class  {
 		return col;
 	}
 }
-
-module.exports = Colors;

@@ -1,11 +1,10 @@
-const rx = require("rxjs");
-const axios = require("axios");
+import {Observable} from "rxjs";
+import axios from "axios";
 
-const GeneStructure = {
-
-    findGene(geneIdentifier) {
-        return new rx.Observable( ( observer ) => {
-            axios.get( '/api/structure/gene/search', {params : {'query' : geneIdentifier}})
+export class Neo4jNodeMenuService {
+    getExpandNodeMenu(nodeId, type) {
+        return new Observable( ( observer ) => {
+            axios.get( '/api/neo4j/node/menu/' + type,  {params: {'id': nodeId}})
                 .then( ( response ) => {
                     observer.next( response.data );
                     observer.complete();
@@ -14,11 +13,11 @@ const GeneStructure = {
                     observer.error( error );
                 } );
         });
-    },
+    }
 
-    getStructure(geneIdentifier, distance) {
-        return new rx.Observable( ( observer ) => {
-            axios.get( '/api/structure/gene', {params : {'id' : geneIdentifier, 'distance':distance}})
+    expandNodeOnQuery (nodeId, label, direction, type) {
+        return new Observable( ( observer ) => {
+            axios.get( '/api/neo4j/node/expand/' + type, {params: {'id': nodeId, 'label': label, 'direction': direction}} )
                 .then( ( response ) => {
                     observer.next( response.data );
                     observer.complete();
@@ -27,11 +26,11 @@ const GeneStructure = {
                     observer.error( error );
                 } );
         });
-    },
+    }
 
-    getGeneToOrganisms(geneIdentifier) {
-        return new rx.Observable( ( observer ) => {
-            axios.get( '/api/structure/gene/organisms', {params:{'id' : geneIdentifier}})
+    expandNodeQuery(nodeId) {
+        return new Observable( ( observer ) => {
+            axios.get( '/api/neo4j/node/expand', {params: {'id': nodeId}})
                 .then( ( response ) => {
                     observer.next( response.data );
                     observer.complete();
@@ -43,5 +42,3 @@ const GeneStructure = {
     }
 
 }
-
-module.exports = GeneStructure;

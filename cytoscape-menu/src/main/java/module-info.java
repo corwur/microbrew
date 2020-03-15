@@ -7,5 +7,6 @@ module corwur.microbrew.cytoscapemenu {
     requires commons.cli;
 	requires corwur.microbrew.lychee.neo4j;
     requires cytoscape.neo4j.plugin;
+    opens corwur.microbrew.cytoscapemenu.model to gson;
     exports corwur.microbrew.cytoscapemenu;
 }
