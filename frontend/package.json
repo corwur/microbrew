@@ -32,7 +32,7 @@
   },
   "devDependencies": {
     "elm-brunch": "^0.12.0",
-    "webpack-cli": "^3.2.1"
+    "webpack-cli": "^3.3.12"
   },
   "scripts": {
     "build": "elm make src/Main.elm --output=target/js/main.js",
